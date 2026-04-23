@@ -1,0 +1,5 @@
+﻿__pycache__/
+*.pyc
+*.pyo
+cold-start-report.html
+.env
