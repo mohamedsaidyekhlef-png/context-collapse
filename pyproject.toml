@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "context-collapse"
+version = "0.1.0"
+description = "Eliminate the 3-day re-entry cost of any codebase."
+readme = "README.md"
+requires-python = ">=3.9"
+
+[project.scripts]
+context-collapse = "cc:main"
+
+[tool.setuptools]
+py-modules = ["cc"]
