@@ -1,0 +1,34 @@
+﻿# context-collapse
+
+> Eliminate the 3-day re-entry cost of returning to any codebase.
+
+Run it on any git repo and get a Cold Start Pack — everything your brain needs to re-enter a codebase in 30 minutes instead of 3 days.
+
+## Usage
+
+\\\
+python cc.py path/to/repo
+python cc.py path/to/repo --no-ai
+python cc.py path/to/repo -o report.html
+\\\
+
+## What it generates
+
+- Re-entry reading sequence (which files to read first)
+- File churn heatmap (what changes most)
+- Implicit coupling map (what breaks when X changes)
+- Key architectural decisions (why the code is shaped this way)
+- Danger zones (where to be careful)
+- Full commit timeline with intent classification
+
+## AI layer
+
+Set your Gemini API key for AI-powered analysis (free at aistudio.google.com):
+
+\\\
+set GEMINI_API_KEY=your_key_here
+\\\
+
+## Zero dependencies
+
+Pure Python standard library. No installs needed.
