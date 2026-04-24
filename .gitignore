@@ -3,3 +3,12 @@
 *.pyo
 cold-start-report.html
 .env
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+context_collapse.egg-info/
+
+# Tool output
+cold-start-report.html
