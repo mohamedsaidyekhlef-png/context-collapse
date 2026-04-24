@@ -31,56 +31,46 @@ def analyze(req: AnalyzeRequest):
         if r.returncode != 0:
             raise HTTPException(422, "Could not clone repo. Must be public.")
 
-        sys.path.insert(0, os.path.join(repo_dir, "..", "..", "src"))
         src_path = os.path.join(os.path.dirname(__file__), "..", "src")
-        if src_path not in sys.path:
-            sys.path.insert(0, src_path)
+        sys.path.insert(0, src_path)
 
         from git_miner import mine
         from report_renderer import render
 
         raw = mine(repo_dir)
 
-        # -- Normalize churn --
-        churn = raw.get("churn", {})
-        if isinstance(churn, list):
-            churn = {item[0]: item[1] for item in churn if len(item) >= 2}
+        # churn: list of {file, changes}
+        churn_list = raw.get("churn", [])
+        churn = {item["file"]: item["changes"] for item in churn_list}
 
-        # -- Normalize pairs --
-        raw_pairs = raw.get("pairs", [])
+        # cochange: list of {a, b, count} or empty
+        cochange = raw.get("cochange", [])
         pairs = []
-        for p in raw_pairs:
+        for p in cochange:
             if isinstance(p, dict):
-                pairs.append({"a": p.get("a",""), "b": p.get("b",""), "count": p.get("count", p.get("n", 0))})
+                pairs.append({"a": p.get("a", ""), "b": p.get("b", ""), "count": p.get("count", p.get("n", 1))})
             elif isinstance(p, (list, tuple)) and len(p) >= 2:
                 pairs.append({"a": str(p[0]), "b": str(p[1]), "count": int(p[2]) if len(p) > 2 else 1})
 
-        # -- Normalize reentry --
-        raw_reentry = raw.get("reentry", [])
-        reentry = []
-        for item in raw_reentry:
-            if isinstance(item, dict):
-                reentry.append({"file": item.get("file", item.get("f", "")), "changes": item.get("changes", item.get("churn", 0)), "score": float(item.get("score", 0))})
-            elif isinstance(item, (list, tuple)) and len(item) >= 2:
-                reentry.append({"file": str(item[0]), "changes": int(item[1]), "score": float(item[2]) if len(item) > 2 else 0.0})
+        # commit_types: dict of {type: count} — convert to percentages
+        commit_types = raw.get("commit_types", {})
+        total_commits = sum(commit_types.values()) or 1
+        dna = {k: round(v / total_commits * 100) for k, v in commit_types.items()}
 
-        # -- Normalize DNA --
-        dna = raw.get("dna", {})
-        if isinstance(dna, list):
-            dna = {item[0]: item[1] for item in dna if len(item) >= 2}
+        # reentry_sequence: list of {file, score, changes}
+        reentry = [{"file": item["file"], "score": item["score"], "changes": item["changes"]} for item in raw.get("reentry_sequence", [])]
 
-        data = {
-            "churn": churn,
-            "pairs": pairs,
-            "reentry": reentry,
-            "dna": dna,
-            "ai": {"purpose": url.split("github.com/")[-1], "key_decisions": [], "danger_zones": [], "ai_powered": False}
-        }
+        # meta
+        meta = raw.get("meta", {})
+        total_commits_count = meta.get("commits", sum(commit_types.values()))
+
+        ai_data = {"purpose": url.split("github.com/")[-1], "key_decisions": [], "danger_zones": [], "ai_powered": False}
 
         if os.environ.get("GEMINI_API_KEY"):
             try:
                 from ai_brain import enrich
-                data = enrich(data)
+                enriched = enrich(raw)
+                ai_data = enriched.get("ai", ai_data)
             except:
                 pass
 
@@ -97,9 +87,9 @@ def analyze(req: AnalyzeRequest):
             "pairs": pairs,
             "reentry": reentry,
             "dna": dna,
-            "ai": data["ai"],
+            "ai": ai_data,
             "stats": {
-                "commits": sum(churn.values()),
+                "commits": total_commits_count,
                 "files": len(churn),
                 "pairs": len(pairs)
             }
