@@ -1,21 +1,25 @@
-from fastapi import FastAPI, HTTPException
+ï»¿from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import subprocess, tempfile, os, sys, shutil, re
 
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["POST","GET"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["POST", "GET"], allow_headers=["*"])
+
 
 class AnalyzeRequest(BaseModel):
     repo_url: str
 
+
 def is_valid(url):
     return bool(re.match(r"^https://github\.com/[\w\-\.]+/[\w\-\.]+$", url.strip().rstrip("/")))
+
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 @app.post("/analyze")
 def analyze(req: AnalyzeRequest):
@@ -27,52 +31,68 @@ def analyze(req: AnalyzeRequest):
     repo_dir = os.path.join(tmpdir, "repo")
 
     try:
-        r = subprocess.run(["git", "clone", "--depth=500", url, repo_dir], capture_output=True, timeout=60)
+        r = subprocess.run(
+            ["git", "clone", "--depth=500", url, repo_dir],
+            capture_output=True, timeout=120
+        )
         if r.returncode != 0:
             raise HTTPException(422, "Could not clone repo. Must be public.")
 
         src_path = os.path.join(os.path.dirname(__file__), "..", "src")
-        sys.path.insert(0, src_path)
+        if src_path not in sys.path:
+            sys.path.insert(0, src_path)
 
         from git_miner import mine
         from report_renderer import render
 
         raw = mine(repo_dir)
 
-        # churn: list of {file, changes}
         churn_list = raw.get("churn", [])
         churn = {item["file"]: item["changes"] for item in churn_list}
 
-        # cochange: list of {a, b, count} or empty
         cochange = raw.get("cochange", [])
         pairs = []
         for p in cochange:
             if isinstance(p, dict):
-                pairs.append({"a": p.get("a", ""), "b": p.get("b", ""), "count": p.get("count", p.get("n", 1))})
+                pairs.append({
+                    "a": p.get("file_a", p.get("a", "")),
+                    "b": p.get("file_b", p.get("b", "")),
+                    "count": p.get("co_changes", p.get("count", p.get("n", 1)))
+                })
             elif isinstance(p, (list, tuple)) and len(p) >= 2:
-                pairs.append({"a": str(p[0]), "b": str(p[1]), "count": int(p[2]) if len(p) > 2 else 1})
+                pairs.append({
+                    "a": str(p[0]),
+                    "b": str(p[1]),
+                    "count": int(p[2]) if len(p) > 2 else 1
+                })
 
-        # commit_types: dict of {type: count} — convert to percentages
         commit_types = raw.get("commit_types", {})
-        total_commits = sum(commit_types.values()) or 1
-        dna = {k: round(v / total_commits * 100) for k, v in commit_types.items()}
+        total_typed = sum(commit_types.values()) or 1
+        dna = {k: round(v / total_typed * 100) for k, v in commit_types.items()}
 
-        # reentry_sequence: list of {file, score, changes}
-        reentry = [{"file": item["file"], "score": item["score"], "changes": item["changes"]} for item in raw.get("reentry_sequence", [])]
+        reentry = [
+            {"file": item["file"], "score": item["score"], "changes": item["changes"]}
+            for item in raw.get("reentry_sequence", [])
+        ]
 
-        # meta
         meta = raw.get("meta", {})
-        total_commits_count = meta.get("commits", sum(commit_types.values()))
+        total_commits_count = meta.get("total_commits", sum(commit_types.values()))
 
-        ai_data = {"purpose": url.split("github.com/")[-1], "key_decisions": [], "danger_zones": [], "ai_powered": False}
+        ai_data = {
+            "purpose": url.split("github.com/")[-1],
+            "key_decisions": [],
+            "danger_zones": [],
+            "shock_insight": None,
+            "ai_powered": False
+        }
 
         if os.environ.get("GEMINI_API_KEY"):
             try:
                 from ai_brain import enrich
                 enriched = enrich(raw)
                 ai_data = enriched.get("ai", ai_data)
-            except:
-                pass
+            except Exception as e:
+                print(f"[AI] enrichment failed: {e}")
 
         out = os.path.join(tmpdir, "report.html")
         render(raw, out)
@@ -97,6 +117,8 @@ def analyze(req: AnalyzeRequest):
 
     except HTTPException:
         raise
+    except subprocess.TimeoutExpired:
+        raise HTTPException(504, "Clone timed out. Try a smaller repo.")
     except Exception as e:
         raise HTTPException(500, str(e))
     finally:
