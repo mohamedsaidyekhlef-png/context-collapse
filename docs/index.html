@@ -1,71 +1,106 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>context-collapse — Cold Start Pack Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<meta name="description" content="Eliminate the 3-day re-entry cost of returning to any codebase. Paste any GitHub URL, get a full analysis in seconds.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--g:#00d4aa;--bg:#07090c;--s:#0e1318;--b:#1e2a35;--t:#c8dce8;--m:#3a5060;--red:#ff6b6b}
+html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--t);font-family:'IBM Plex Mono',monospace;overflow-x:hidden}
+
+/* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:99;background:#07090ccc;backdrop-filter:blur(12px);border-bottom:1px solid var(--b);padding:0 40px;height:56px;display:flex;align-items:center;justify-content:space-between}
 .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;letter-spacing:.1em}
 .nav-logo span{color:var(--g)}
 .nav-links{display:flex;gap:24px;align-items:center}
 .nav-links a{color:var(--m);font-size:11px;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;transition:color .2s}
 .nav-links a:hover{color:var(--g)}
-.nav-btn{background:var(--g)!important;color:#07090c!important;padding:8px 18px;border-radius:6px;font-weight:700}
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative}
+.nav-btn{background:var(--g);color:#07090c!important;padding:8px 18px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.1em}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,#00d4aa08 0%,transparent 70%);pointer-events:none}
 .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--b) 1px,transparent 1px),linear-gradient(90deg,var(--b) 1px,transparent 1px);background-size:48px 48px;opacity:.25;pointer-events:none}
-.hero-tag{font-size:11px;color:var(--g);letter-spacing:.3em;text-transform:uppercase;margin-bottom:24px}
-.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,14vw,148px);color:#fff;letter-spacing:.04em;line-height:.88}
+.hero-tag{font-size:11px;color:var(--g);letter-spacing:.3em;text-transform:uppercase;margin-bottom:24px;animation:fadeUp .6s .1s both}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,14vw,148px);color:#fff;letter-spacing:.04em;line-height:.88;animation:fadeUp .6s .2s both}
 .hero-title .acc{color:var(--g)}
-.hero-desc{font-size:15px;color:var(--m);margin-top:28px;line-height:1.9;max-width:520px}
+.hero-desc{font-size:15px;color:var(--m);margin-top:28px;line-height:1.9;max-width:520px;animation:fadeUp .6s .35s both}
 .hero-desc strong{color:var(--t)}
-.demo-box{width:100%;max-width:680px;margin-top:48px;position:relative;z-index:1}
+.hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;animation:fadeUp .6s .5s both}
+.badge{padding:4px 12px;border-radius:100px;font-size:10px;border:1px solid var(--b);color:var(--m)}
+
+/* LIVE DEMO BOX */
+.demo-box{width:100%;max-width:680px;margin-top:48px;animation:fadeUp .6s .55s both}
 .demo-label{font-size:10px;color:var(--g);letter-spacing:.25em;text-transform:uppercase;margin-bottom:12px;text-align:left}
-.demo-input-row{display:flex;border:1px solid var(--b);border-radius:10px;overflow:hidden;transition:border-color .2s;background:var(--s)}
+.demo-input-row{display:flex;gap:0;border:1px solid var(--b);border-radius:10px;overflow:hidden;transition:border-color .2s;background:var(--s)}
 .demo-input-row:focus-within{border-color:var(--g)}
-.demo-prefix{padding:0 16px;display:flex;align-items:center;color:var(--m);font-size:13px;border-right:1px solid var(--b);background:#0a0d10;white-space:nowrap}
+.demo-prefix{padding:0 16px;display:flex;align-items:center;color:var(--m);font-size:13px;border-right:1px solid var(--b);white-space:nowrap;background:#0a0d10}
 .demo-input{flex:1;background:transparent;border:none;outline:none;padding:16px 18px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#fff}
 .demo-input::placeholder{color:var(--m)}
 .demo-btn{background:var(--g);border:none;color:#07090c;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;padding:0 28px;cursor:pointer;transition:background .2s;white-space:nowrap}
 .demo-btn:hover{background:#00f0c0}
 .demo-btn:disabled{background:#1e3a30;color:#3a5060;cursor:not-allowed}
-.demo-status{margin-top:14px;font-size:12px;min-height:20px;text-align:left}
-.status-idle{color:var(--m)}.status-loading{color:var(--g)}.status-error{color:var(--red)}.status-ok{color:var(--g)}
+
+/* STATUS STATES */
+.demo-status{margin-top:14px;font-size:12px;min-height:20px;text-align:left;transition:all .3s}
+.status-idle{color:var(--m)}
+.status-loading{color:var(--g)}
+.status-error{color:var(--red)}
+.status-ok{color:var(--g)}
+
+/* PROGRESS BAR */
 .progress-wrap{margin-top:10px;height:2px;background:var(--b);border-radius:2px;overflow:hidden;opacity:0;transition:opacity .3s}
 .progress-wrap.visible{opacity:1}
 .progress-bar{height:100%;width:0%;background:var(--g);border-radius:2px;transition:width .4s ease}
-.hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
-.badge{padding:4px 12px;border-radius:100px;font-size:10px;border:1px solid var(--b);color:var(--m)}
+
+/* REPORT FRAME */
 .report-section{display:none;padding:40px 24px;max-width:1100px;margin:0 auto}
 .report-section.visible{display:block}
 .report-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
 .report-title{font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff}
 .report-meta{font-size:11px;color:var(--m)}
-.report-stats{display:flex;gap:24px}
+.report-stats{display:flex;gap:24px;flex-wrap:wrap}
+.stat{text-align:center}
 .stat-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--g);line-height:1}
 .stat-label{font-size:10px;color:var(--m);letter-spacing:.15em;text-transform:uppercase}
-.report-frame-wrap{border:1px solid var(--b);border-radius:12px;overflow:hidden}
+.report-frame-wrap{border:1px solid var(--b);border-radius:12px;overflow:hidden;margin-top:8px}
 .report-frame{width:100%;height:800px;border:none;background:#fff}
 .report-actions{display:flex;gap:12px;margin-top:16px}
+
+/* SECTIONS */
 .section{max-width:1100px;margin:0 auto;padding:80px 24px}
 .section-tag{font-size:10px;color:var(--g);letter-spacing:.25em;text-transform:uppercase;margin-bottom:16px}
-.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,60px);color:#fff;line-height:1;margin-bottom:20px}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,60px);color:#fff;letter-spacing:.03em;line-height:1;margin-bottom:20px}
+
+/* PROBLEM */
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px;align-items:center}
+.problem-text{color:var(--m);font-size:13px;line-height:2}
+.problem-text strong{color:var(--t)}
+.problem-box{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:28px;font-size:12px;line-height:2.2}
+.pb-line{display:flex;gap:12px}
+.pb-day{color:var(--g);min-width:60px;font-weight:600}
+.pb-divider{border:none;border-top:1px solid var(--b);margin:10px 0}
+.pb-total{color:var(--red);font-size:11px}
+
+/* FEATURES */
 .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
 .feat{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:24px;transition:border-color .2s,transform .2s}
 .feat:hover{border-color:#00d4aa40;transform:translateY(-3px)}
 .feat-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:#00d4aa18;line-height:1;margin-bottom:8px}
 .feat-title{font-size:12px;color:#fff;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
 .feat-desc{font-size:11px;color:var(--m);line-height:1.8}
+
+/* PRICING */
 .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
-.plan{background:var(--s);border:1px solid var(--b);border-radius:14px;padding:28px;position:relative}
-.plan.featured{border-color:var(--g)}
+.plan{background:var(--s);border:1px solid var(--b);border-radius:14px;padding:28px;position:relative;transition:border-color .2s}
+.plan.featured{border-color:var(--g);background:linear-gradient(135deg,#0d1e1a,var(--s))}
 .plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--g);color:#07090c;font-size:10px;font-weight:700;letter-spacing:.1em;padding:4px 14px;border-radius:100px}
-.plan-name{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#fff}
+.plan-name{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#fff;letter-spacing:.05em}
 .plan-price{margin:16px 0;display:flex;align-items:baseline;gap:4px}
 .plan-amount{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--g);line-height:1}
 .plan-period{font-size:12px;color:var(--m)}
@@ -75,28 +110,44 @@ nav{position:fixed;top:0;left:0;right:0;z-index:99;background:#07090ccc;backdrop
 .plan-features li:last-child{border-bottom:none}
 .plan-features li::before{content:'→';color:var(--g)}
 .plan-btn{display:block;text-align:center;padding:12px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;text-decoration:none;transition:all .2s;cursor:pointer;border:none;width:100%}
-.btn-p{background:var(--g);color:#07090c}.btn-p:hover{background:#00f0c0}
-.btn-s{background:transparent;color:var(--g);border:1px solid #00d4aa33}.btn-s:hover{border-color:var(--g)}
+.plan-btn-p{background:var(--g);color:#07090c}
+.plan-btn-p:hover{background:#00f0c0}
+.plan-btn-s{background:transparent;color:var(--g);border:1px solid #00d4aa33}
+.plan-btn-s:hover{border-color:var(--g);background:#00d4aa10}
+
+/* INSTALL */
 .install-section{background:linear-gradient(135deg,#0d1e1a,var(--s));border-top:1px solid #00d4aa20;border-bottom:1px solid #00d4aa20;padding:80px 24px;text-align:center}
 .install-wrap{max-width:600px;margin:0 auto}
-.install-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,72px);color:#fff;margin-bottom:12px}
+.install-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,72px);color:#fff;letter-spacing:.04em;margin-bottom:12px}
 .install-sub{color:var(--m);font-size:13px;line-height:1.9;margin-bottom:36px}
 .install-box{background:#0a0e12;border:1px solid var(--b);border-radius:10px;padding:16px 24px;display:inline-flex;align-items:center;gap:14px;margin-bottom:24px;cursor:pointer;transition:border-color .2s}
 .install-box:hover{border-color:var(--g)}
+.ib-prompt{color:var(--g);font-size:14px}
+.ib-cmd{color:#fff;font-size:14px;font-weight:600}
+.ib-copy{color:#1e3a30;font-size:10px}
 .btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .btn{padding:13px 28px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;cursor:pointer;text-decoration:none;transition:all .2s;display:inline-block}
+.btn-p{background:var(--g);color:#07090c}
+.btn-p:hover{background:#00f0c0}
+.btn-s{background:transparent;color:var(--g);border:1px solid #00d4aa33}
+.btn-s:hover{border-color:var(--g);background:#00d4aa10}
+
+/* FOOTER */
 footer{border-top:1px solid var(--b);padding:32px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--m)}
 footer a{color:var(--m);text-decoration:none}
 footer a:hover{color:var(--g)}
+
+/* ANIMS */
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{display:inline-block;width:10px;height:10px;border:2px solid #1e3a30;border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
 .reveal.visible{opacity:1;transform:none}
-@media(max-width:700px){.features-grid,.pricing-grid{grid-template-columns:1fr}.demo-input-row{flex-direction:column}}
+@media(max-width:700px){.problem-grid,.features-grid,.pricing-grid{grid-template-columns:1fr}.demo-input-row{flex-direction:column;border-radius:10px}.demo-btn{padding:14px;border-radius:0 0 9px 9px}}
 </style>
 </head>
 <body>
+
 <nav>
   <div class="nav-logo">CONTEXT<span>—</span>COLLAPSE</div>
   <div class="nav-links">
@@ -108,21 +159,27 @@ footer a:hover{color:var(--g)}
   </div>
 </nav>
 
+<!-- HERO -->
 <section class="hero" id="top">
   <div class="grid-bg"></div>
   <div class="hero-tag">Open Source · AI-Powered Developer Tool</div>
   <h1 class="hero-title">CONTEXT<span class="acc">—</span><br>COLLAPSE</h1>
   <p class="hero-desc">Eliminate the <strong>3-day re-entry cost</strong> of returning to any codebase.<br>Paste a GitHub URL. Get a full analysis in seconds.</p>
+
+  <!-- LIVE DEMO INPUT -->
   <div class="demo-box" id="demo">
     <div class="demo-label">→ Try it live — paste any public GitHub repo</div>
     <div class="demo-input-row">
       <span class="demo-prefix">github.com/</span>
-      <input class="demo-input" id="repoInput" type="text" placeholder="pallets/flask" autocomplete="off" spellcheck="false"/>
+      <input class="demo-input" id="repoInput" type="text" placeholder="torvalds/linux" autocomplete="off" spellcheck="false"/>
       <button class="demo-btn" id="analyzeBtn" onclick="runAnalysis()">ANALYZE →</button>
     </div>
     <div class="demo-status status-idle" id="demoStatus">Enter any public GitHub repo above and hit Analyze</div>
-    <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
   </div>
+
   <div class="hero-badges">
     <span class="badge">Python 3.9+</span>
     <span class="badge">Zero Dependencies</span>
@@ -132,70 +189,123 @@ footer a:hover{color:var(--g)}
   </div>
 </section>
 
+<!-- REPORT OUTPUT -->
 <div class="report-section" id="reportSection">
   <div class="report-header">
-    <div><div class="report-title" id="reportTitle">COLD START PACK</div><div class="report-meta" id="reportMeta"></div></div>
+    <div>
+      <div class="report-title" id="reportTitle">COLD START PACK</div>
+      <div class="report-meta" id="reportMeta"></div>
+    </div>
     <div class="report-stats" id="reportStats"></div>
   </div>
-  <div class="report-frame-wrap"><iframe class="report-frame" id="reportFrame" sandbox="allow-scripts allow-same-origin"></iframe></div>
+  <div class="report-frame-wrap">
+    <iframe class="report-frame" id="reportFrame" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
   <div class="report-actions">
     <button class="btn btn-p" onclick="downloadReport()">↓ Download Report</button>
-    <button class="btn btn-s" onclick="resetDemo()">← Analyze Another</button>
+    <button class="btn btn-s" onclick="resetDemo()">← Analyze Another Repo</button>
   </div>
 </div>
 
+<!-- PROBLEM -->
+<div class="section reveal" id="problem">
+  <div class="section-tag">The Problem Nobody Named</div>
+  <div class="section-title">The Cold Start<br>Problem</div>
+  <div class="problem-grid">
+    <div class="problem-text">
+      Every developer knows this pain. You open a codebase you haven't touched in 6 months.<br><br>
+      You spend <strong>2–3 days</strong> just re-understanding it before you write a single line.<br><br>
+      Multiply by every new hire, every PR review, every open-source contributor.<br><br>
+      This is an <strong>invisible productivity drain</strong> — and nobody had a tool for it.<br><br>
+      <strong>context-collapse names it. And eliminates it.</strong>
+    </div>
+    <div class="problem-box">
+      <div class="pb-line"><span class="pb-day">Day 1</span><span>Reading files, trying to understand structure</span></div>
+      <div class="pb-line"><span class="pb-day">Day 2</span><span>Tracing dependencies, hitting dead ends</span></div>
+      <div class="pb-line"><span class="pb-day">Day 3</span><span>Finally have a mental model, start coding</span></div>
+      <hr class="pb-divider">
+      <div class="pb-line"><span class="pb-day">Day 4</span><span style="color:var(--g)">Make the actual change. Takes 20 minutes.</span></div>
+      <hr class="pb-divider">
+      <div class="pb-total">3 days wasted. Every time. For every developer.</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
 <div class="section reveal" id="features">
   <div class="section-tag">What You Get</div>
-  <div class="section-title">Inside Every Cold Start Pack</div>
+  <div class="section-title">Inside Every<br>Cold Start Pack</div>
   <div class="features-grid">
-    <div class="feat"><div class="feat-num">01</div><div class="feat-title">Re-Entry Sequence</div><div class="feat-desc">Exactly which files to read first, ranked by importance. Rebuild your mental model in 30 minutes.</div></div>
-    <div class="feat"><div class="feat-num">02</div><div class="feat-title">File Churn Heatmap</div><div class="feat-desc">What changes most, visualized. High churn = high importance OR high instability.</div></div>
-    <div class="feat"><div class="feat-num">03</div><div class="feat-title">Implicit Coupling</div><div class="feat-desc">Files that always change together — the hidden architecture your diagram never shows.</div></div>
+    <div class="feat"><div class="feat-num">01</div><div class="feat-title">Re-Entry Sequence</div><div class="feat-desc">Exactly which files to read first, ranked by importance score. Rebuild your mental model in 30 minutes.</div></div>
+    <div class="feat"><div class="feat-num">02</div><div class="feat-title">File Churn Heatmap</div><div class="feat-desc">What changes most, visualized. High churn = high importance OR high instability. Know before you touch.</div></div>
+    <div class="feat"><div class="feat-num">03</div><div class="feat-title">Implicit Coupling</div><div class="feat-desc">Files that always change together — the hidden architecture your diagram never shows. Source of 80% of bugs.</div></div>
     <div class="feat"><div class="feat-num">04</div><div class="feat-title">Danger Zones</div><div class="feat-desc">AI-identified areas where changes cascade silently. Know what to test before you break production.</div></div>
-    <div class="feat"><div class="feat-num">05</div><div class="feat-title">Commit DNA</div><div class="feat-desc">Every commit classified: feature, fix, refactor, perf, docs. See the team culture at a glance.</div></div>
-    <div class="feat"><div class="feat-num">06</div><div class="feat-title">Key Decisions</div><div class="feat-desc">AI extracts why the code is shaped the way it is. Architectural choices surfaced from history.</div></div>
+    <div class="feat"><div class="feat-num">05</div><div class="feat-title">Commit DNA</div><div class="feat-desc">Every commit classified by intent: feature, fix, refactor, perf, docs. See the team culture at a glance.</div></div>
+    <div class="feat"><div class="feat-num">06</div><div class="feat-title">Key Decisions</div><div class="feat-desc">AI extracts why the code is shaped the way it is. Architectural choices buried in history, surfaced.</div></div>
   </div>
 </div>
 
+<!-- PRICING -->
 <div class="section reveal" id="pricing">
   <div class="section-tag">Simple Pricing</div>
-  <div class="section-title">Start Free. Scale When Ready.</div>
+  <div class="section-title">Start Free.<br>Scale When Ready.</div>
   <div class="pricing-grid">
     <div class="plan">
       <div class="plan-name">Free</div>
       <div class="plan-price"><span class="plan-amount">$0</span><span class="plan-period">/forever</span></div>
-      <div class="plan-desc">For developers trying it out.</div>
-      <ul class="plan-features"><li>3 reports total</li><li>Public repos only</li><li>No AI analysis</li><li>Download reports</li></ul>
-      <button class="plan-btn btn-s" onclick="document.getElementById('repoInput').focus();window.scrollTo({top:0,behavior:'smooth'})">Start Free →</button>
+      <div class="plan-desc">For developers trying it out. No credit card required.</div>
+      <ul class="plan-features">
+        <li>3 reports total</li>
+        <li>Public repos only</li>
+        <li>No AI analysis</li>
+        <li>Download reports</li>
+      </ul>
+      <button class="plan-btn plan-btn-s" onclick="document.getElementById('repoInput').focus();window.scrollTo({top:0,behavior:'smooth'})">Start Free →</button>
     </div>
     <div class="plan featured">
       <div class="plan-badge">MOST POPULAR</div>
       <div class="plan-name">Solo</div>
       <div class="plan-price"><span class="plan-amount">$9</span><span class="plan-period">/month</span></div>
-      <div class="plan-desc">For individual developers.</div>
-      <ul class="plan-features"><li>50 reports / month</li><li>Public + private repos</li><li>AI-powered analysis</li><li>Danger zone detection</li><li>Key decisions extracted</li><li>Download reports</li></ul>
-      <button class="plan-btn btn-p" onclick="alert('Coming soon! Star us on GitHub to get notified.')">Get Solo →</button>
+      <div class="plan-desc">For individual developers who re-enter codebases regularly.</div>
+      <ul class="plan-features">
+        <li>50 reports / month</li>
+        <li>Public + private repos</li>
+        <li>AI-powered analysis</li>
+        <li>Danger zone detection</li>
+        <li>Key decisions extracted</li>
+        <li>Download reports</li>
+      </ul>
+      <button class="plan-btn plan-btn-p" onclick="alert('Coming soon — join the waitlist at GitHub!')">Get Solo →</button>
     </div>
     <div class="plan">
       <div class="plan-name">Team</div>
       <div class="plan-price"><span class="plan-amount">$29</span><span class="plan-period">/month</span></div>
-      <div class="plan-desc">For teams and organizations.</div>
-      <ul class="plan-features"><li>Unlimited reports</li><li>Public + private repos</li><li>Full AI analysis</li><li>Team dashboard</li><li>Shareable report links</li><li>Priority support</li></ul>
-      <button class="plan-btn btn-s" onclick="alert('Coming soon! Star us on GitHub to get notified.')">Get Team →</button>
+      <div class="plan-desc">For teams onboarding developers and managing multiple repos.</div>
+      <ul class="plan-features">
+        <li>Unlimited reports</li>
+        <li>Public + private repos</li>
+        <li>Full AI analysis</li>
+        <li>Team dashboard</li>
+        <li>Shareable report links</li>
+        <li>Priority support</li>
+      </ul>
+      <button class="plan-btn plan-btn-s" onclick="alert('Coming soon — join the waitlist at GitHub!')">Get Team →</button>
     </div>
   </div>
 </div>
 
+<!-- CLI INSTALL -->
 <div class="install-section reveal">
   <div class="install-wrap">
-    <div class="section-tag">Or Run It Locally</div>
-    <div class="install-title">ZERO DEPS. ONE COMMAND.</div>
-    <p class="install-sub">Pure Python stdlib. No config. Works on any OS, any repo, any language.</p>
-    <div class="install-box" onclick="navigator.clipboard?.writeText('pip install context-collapse');this.querySelector('span:last-child').textContent='copied!'">
-      <span style="color:var(--g)">$</span>
-      <span style="color:#fff;font-weight:600">pip install context-collapse</span>
-      <span style="color:#1e3a30;font-size:10px">click to copy</span>
-    </div><br>
+    <div class="section-tag" style="text-align:center">Or Run It Locally</div>
+    <div class="install-title">ZERO DEPS.<br>ONE COMMAND.</div>
+    <p class="install-sub">Pure Python standard library. No config. Works on any OS, any git repo, any language.</p>
+    <div class="install-box" onclick="navigator.clipboard?.writeText('pip install context-collapse');this.querySelector('.ib-copy').textContent='copied!'">
+      <span class="ib-prompt">$</span>
+      <span class="ib-cmd">pip install context-collapse</span>
+      <span class="ib-copy">click to copy</span>
+    </div>
+    <br>
     <div class="btn-row">
       <a class="btn btn-p" href="https://pypi.org/project/context-collapse/" target="_blank">View on PyPI</a>
       <a class="btn btn-s" href="https://github.com/mohamedsaidyekhlef-png/context-collapse" target="_blank">★ Star on GitHub</a>
@@ -213,55 +323,87 @@ footer a:hover{color:var(--g)}
 </footer>
 
 <script>
-const API_URL = 'https://context-collapse-api.fly.dev';
+// ─── CONFIG ───────────────────────────────────────────────
+// Replace this with your Railway API URL after deploying
+const API_URL = 'https://your-api.railway.app';
+
 let reportHtml = '';
 
+// ─── ANALYSIS ─────────────────────────────────────────────
 async function runAnalysis() {
   const input = document.getElementById('repoInput').value.trim();
   if (!input) return;
-  const url = input.startsWith('https://github.com/') ? input : 'https://github.com/' + input;
-  setStatus('loading', 'Cloning repository...');
+
+  const url = input.startsWith('https://github.com/')
+    ? input
+    : `https://github.com/${input}`;
+
+  setStatus('loading', '⟳ Cloning repository...');
   setProgress(10);
   document.getElementById('analyzeBtn').disabled = true;
   document.getElementById('reportSection').classList.remove('visible');
+
   try {
+    // Simulate progress while waiting
     let p = 10;
     const ticker = setInterval(() => {
       p = Math.min(p + Math.random() * 8, 85);
       setProgress(p);
-      if (p < 30) setStatus('loading', 'Cloning repository...');
-      else if (p < 55) setStatus('loading', 'Mining git history...');
-      else if (p < 75) setStatus('loading', 'Running analysis...');
-      else setStatus('loading', 'Rendering report...');
+      if (p < 30) setStatus('loading', '⟳ Cloning repository...');
+      else if (p < 55) setStatus('loading', '⟳ Mining git history...');
+      else if (p < 75) setStatus('loading', '⟳ Running analysis...');
+      else setStatus('loading', '⟳ Rendering report...');
     }, 600);
-    const res = await fetch(API_URL + '/analyze', {
+
+    const res = await fetch(`${API_URL}/analyze`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({repo_url: url})
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repo_url: url })
     });
+
     clearInterval(ticker);
-    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || 'Analysis failed'); }
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Analysis failed');
+    }
+
     const data = await res.json();
     setProgress(100);
-    setStatus('ok', '✓ Done — ' + data.stats.commits + ' commits · ' + data.stats.files + ' files · ' + data.stats.pairs + ' coupling pairs');
+    setStatus('ok', `✓ Done — ${data.stats.commits} commits · ${data.stats.files} files · ${data.stats.pairs} coupling pairs`);
+
     reportHtml = data.report_html;
-    document.getElementById('reportTitle').textContent = url.replace('https://github.com/','').toUpperCase();
-    document.getElementById('reportMeta').textContent = 'Generated ' + new Date().toLocaleString();
-    document.getElementById('reportStats').innerHTML = '<div class="stat"><div class="stat-num">'+data.stats.commits+'</div><div class="stat-label">Commits</div></div><div class="stat"><div class="stat-num">'+data.stats.files+'</div><div class="stat-label">Files</div></div><div class="stat"><div class="stat-num">'+data.stats.pairs+'</div><div class="stat-label">Pairs</div></div>';
-    document.getElementById('reportFrame').srcdoc = data.report_html;
-    document.getElementById('reportSection').classList.add('visible');
-    document.getElementById('reportSection').scrollIntoView({behavior:'smooth',block:'start'});
-  } catch(err) {
+    showReport(url, data);
+
+  } catch (err) {
     setProgress(0);
-    setStatus('error', '✗ ' + err.message);
+    setStatus('error', `✗ ${err.message}`);
+    document.getElementById('analyzeBtn').disabled = false;
   }
+}
+
+function showReport(url, data) {
+  const repoName = url.replace('https://github.com/', '');
+  document.getElementById('reportTitle').textContent = repoName.toUpperCase();
+  document.getElementById('reportMeta').textContent = `Generated ${new Date().toLocaleString()}`;
+  document.getElementById('reportStats').innerHTML = `
+    <div class="stat"><div class="stat-num">${data.stats.commits}</div><div class="stat-label">Commits</div></div>
+    <div class="stat"><div class="stat-num">${data.stats.files}</div><div class="stat-label">Files</div></div>
+    <div class="stat"><div class="stat-num">${data.stats.pairs}</div><div class="stat-label">Coupling Pairs</div></div>
+  `;
+
+  const frame = document.getElementById('reportFrame');
+  frame.srcdoc = data.report_html;
+  document.getElementById('reportSection').classList.add('visible');
+  document.getElementById('reportSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
   document.getElementById('analyzeBtn').disabled = false;
 }
 
 function downloadReport() {
   if (!reportHtml) return;
+  const blob = new Blob([reportHtml], { type: 'text/html' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([reportHtml], {type:'text/html'}));
+  a.href = URL.createObjectURL(blob);
   a.download = 'cold-start-report.html';
   a.click();
 }
@@ -271,25 +413,32 @@ function resetDemo() {
   document.getElementById('repoInput').value = '';
   setStatus('idle', 'Enter any public GitHub repo above and hit Analyze');
   setProgress(0);
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setStatus(type, msg) {
   const el = document.getElementById('demoStatus');
-  el.className = 'demo-status status-' + type;
-  el.innerHTML = type === 'loading' ? '<span class="spinner"></span>' + msg : msg;
+  el.className = `demo-status status-${type}`;
+  el.innerHTML = type === 'loading' ? `<span class="spinner"></span>${msg}` : msg;
 }
 
 function setProgress(pct) {
-  document.getElementById('progressWrap').classList.toggle('visible', pct > 0 && pct < 100);
-  document.getElementById('progressBar').style.width = pct + '%';
+  const wrap = document.getElementById('progressWrap');
+  const bar = document.getElementById('progressBar');
+  wrap.classList.toggle('visible', pct > 0 && pct < 100);
+  bar.style.width = pct + '%';
 }
 
-document.getElementById('repoInput').addEventListener('keydown', e => { if (e.key === 'Enter') runAnalysis(); });
-const ro = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold:0.1});
+// Enter key on input
+document.getElementById('repoInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runAnalysis();
+});
+
+// Scroll reveal
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
 </script>
 </body>
 </html>
-
-
