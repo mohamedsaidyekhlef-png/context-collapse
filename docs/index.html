@@ -1,156 +1,127 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>context-collapse � Cold Start Pack Generator</title>
-<meta name="description" content="Eliminate the 3-day re-entry cost of returning to any codebase.">
+<title>context-collapse — Cold Start Pack Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Bebas+Neue&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--g:#00d4aa;--bg:#07090c;--s:#0e1318;--b:#1e2a35;--t:#c8dce8;--m:#3a5060}
-html{scroll-behavior:smooth}
+:root{--g:#00d4aa;--bg:#07090c;--s:#0e1318;--b:#1e2a35;--t:#c8dce8;--m:#3a5060;--red:#ff6b6b}
 body{background:var(--bg);color:var(--t);font-family:'IBM Plex Mono',monospace;overflow-x:hidden}
-/* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:99;background:#07090ccc;backdrop-filter:blur(12px);border-bottom:1px solid var(--b);padding:0 40px;height:56px;display:flex;align-items:center;justify-content:space-between}
 .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;letter-spacing:.1em}
 .nav-logo span{color:var(--g)}
 .nav-links{display:flex;gap:24px;align-items:center}
 .nav-links a{color:var(--m);font-size:11px;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;transition:color .2s}
 .nav-links a:hover{color:var(--g)}
-.nav-btn{background:var(--g);color:#07090c;padding:8px 18px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.1em;text-decoration:none;transition:opacity .2s}
-.nav-btn:hover{opacity:.85}
-/* HERO */
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative;overflow:hidden}
+.nav-btn{background:var(--g)!important;color:#07090c!important;padding:8px 18px;border-radius:6px;font-weight:700}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,#00d4aa08 0%,transparent 70%);pointer-events:none}
-.grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--b) 1px,transparent 1px),linear-gradient(90deg,var(--b) 1px,transparent 1px);background-size:48px 48px;opacity:.3;pointer-events:none}
-.hero-tag{font-size:11px;color:var(--g);letter-spacing:.3em;text-transform:uppercase;margin-bottom:24px;animation:fadeUp .6s .1s both}
-.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,15vw,160px);color:#fff;letter-spacing:.04em;line-height:.88;animation:fadeUp .6s .2s both}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--b) 1px,transparent 1px),linear-gradient(90deg,var(--b) 1px,transparent 1px);background-size:48px 48px;opacity:.25;pointer-events:none}
+.hero-tag{font-size:11px;color:var(--g);letter-spacing:.3em;text-transform:uppercase;margin-bottom:24px}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,14vw,148px);color:#fff;letter-spacing:.04em;line-height:.88}
 .hero-title .acc{color:var(--g)}
-.hero-desc{font-size:15px;color:var(--m);margin-top:28px;line-height:1.9;max-width:540px;animation:fadeUp .6s .35s both}
+.hero-desc{font-size:15px;color:var(--m);margin-top:28px;line-height:1.9;max-width:520px}
 .hero-desc strong{color:var(--t)}
-.hero-install{display:inline-flex;align-items:center;gap:16px;background:var(--s);border:1px solid var(--b);border-radius:10px;padding:14px 24px;margin-top:36px;animation:fadeUp .6s .5s both;cursor:pointer;transition:border-color .2s}
-.hero-install:hover{border-color:var(--g)}
-.hi-prompt{color:var(--g);font-size:14px}
-.hi-cmd{color:#fff;font-size:14px;font-weight:600}
-.hi-badge{background:#00d4aa20;color:var(--g);padding:3px 10px;border-radius:100px;font-size:10px;border:1px solid #00d4aa30}
-.hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;animation:fadeUp .6s .6s both}
+.demo-box{width:100%;max-width:680px;margin-top:48px;position:relative;z-index:1}
+.demo-label{font-size:10px;color:var(--g);letter-spacing:.25em;text-transform:uppercase;margin-bottom:12px;text-align:left}
+.demo-input-row{display:flex;border:1px solid var(--b);border-radius:10px;overflow:hidden;transition:border-color .2s;background:var(--s)}
+.demo-input-row:focus-within{border-color:var(--g)}
+.demo-prefix{padding:0 16px;display:flex;align-items:center;color:var(--m);font-size:13px;border-right:1px solid var(--b);background:#0a0d10;white-space:nowrap}
+.demo-input{flex:1;background:transparent;border:none;outline:none;padding:16px 18px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#fff}
+.demo-input::placeholder{color:var(--m)}
+.demo-btn{background:var(--g);border:none;color:#07090c;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;padding:0 28px;cursor:pointer;transition:background .2s;white-space:nowrap}
+.demo-btn:hover{background:#00f0c0}
+.demo-btn:disabled{background:#1e3a30;color:#3a5060;cursor:not-allowed}
+.demo-status{margin-top:14px;font-size:12px;min-height:20px;text-align:left}
+.status-idle{color:var(--m)}.status-loading{color:var(--g)}.status-error{color:var(--red)}.status-ok{color:var(--g)}
+.progress-wrap{margin-top:10px;height:2px;background:var(--b);border-radius:2px;overflow:hidden;opacity:0;transition:opacity .3s}
+.progress-wrap.visible{opacity:1}
+.progress-bar{height:100%;width:0%;background:var(--g);border-radius:2px;transition:width .4s ease}
+.hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
 .badge{padding:4px 12px;border-radius:100px;font-size:10px;border:1px solid var(--b);color:var(--m)}
-/* PROBLEM */
+.report-section{display:none;padding:40px 24px;max-width:1100px;margin:0 auto}
+.report-section.visible{display:block}
+.report-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.report-title{font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff}
+.report-meta{font-size:11px;color:var(--m)}
+.report-stats{display:flex;gap:24px}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--g);line-height:1}
+.stat-label{font-size:10px;color:var(--m);letter-spacing:.15em;text-transform:uppercase}
+.report-frame-wrap{border:1px solid var(--b);border-radius:12px;overflow:hidden}
+.report-frame{width:100%;height:800px;border:none;background:#fff}
+.report-actions{display:flex;gap:12px;margin-top:16px}
 .section{max-width:1100px;margin:0 auto;padding:80px 24px}
 .section-tag{font-size:10px;color:var(--g);letter-spacing:.25em;text-transform:uppercase;margin-bottom:16px}
-.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,60px);color:#fff;letter-spacing:.03em;line-height:1;margin-bottom:20px}
-.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px;align-items:center}
-.problem-text{color:var(--m);font-size:13px;line-height:2}
-.problem-text strong{color:var(--t)}
-.problem-box{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:28px;font-size:12px;line-height:2.2}
-.pb-line{display:flex;gap:12px;align-items:flex-start}
-.pb-day{color:var(--g);min-width:60px;font-weight:600}
-.pb-act{color:var(--t)}
-.pb-divider{border:none;border-top:1px solid var(--b);margin:12px 0}
-.pb-total{color:#ff6b6b;font-size:11px}
-/* TERMINAL */
-.terminal-section{background:var(--s);border-top:1px solid var(--b);border-bottom:1px solid var(--b);padding:80px 24px}
-.terminal-wrap{max-width:800px;margin:0 auto}
-.terminal{background:#0a0e12;border:1px solid var(--b);border-radius:12px;overflow:hidden;box-shadow:0 40px 80px #000a}
-.tbar{background:var(--s);border-bottom:1px solid var(--b);padding:12px 16px;display:flex;align-items:center;gap:8px}
-.dot{width:10px;height:10px;border-radius:50%}
-.dr{background:#ff5f57}.dy{background:#febc2e}.dg{background:#28c840}
-.ttitle{color:var(--m);font-size:11px;margin-left:8px;letter-spacing:.1em}
-.tbody{padding:24px;font-size:12px;line-height:2.2}
-.tp{color:var(--g)}.tc{color:#fff;font-weight:600}.ts2{color:var(--m)}.tsec{color:#fbbf24}.tf{color:#a78bfa}.tn{color:var(--g)}.tw{color:#ff6b6b}.tok{color:var(--g);font-weight:700}
-.tline{display:block;opacity:0}.tline.on{animation:fadeIn .15s forwards}
-.cursor{display:inline-block;width:8px;height:14px;background:var(--g);vertical-align:middle;animation:blink 1s infinite;margin-left:2px}
-/* FEATURES */
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,60px);color:#fff;line-height:1;margin-bottom:20px}
 .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
-.feat{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:24px;transition:border-color .2s,transform .2s;cursor:default}
+.feat{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:24px;transition:border-color .2s,transform .2s}
 .feat:hover{border-color:#00d4aa40;transform:translateY(-3px)}
-.feat-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:#00d4aa20;line-height:1;margin-bottom:8px}
+.feat-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:#00d4aa18;line-height:1;margin-bottom:8px}
 .feat-title{font-size:12px;color:#fff;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
 .feat-desc{font-size:11px;color:var(--m);line-height:1.8}
-/* CHURN VIZ */
-.viz-section{max-width:1100px;margin:0 auto;padding:0 24px 80px}
-.viz-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px}
-.viz-card{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:24px}
-.vc-title{font-size:10px;color:var(--m);letter-spacing:.2em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:8px}
-.vc-title::before{content:'';display:inline-block;width:3px;height:12px;background:var(--g);border-radius:2px}
-.churn-row{display:grid;grid-template-columns:22px 1fr 70px 36px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #0d1318;font-size:11px}
-.churn-row:last-child{border-bottom:none}
-.cr-rank{color:var(--m);font-size:12px}
-.cr-file{color:var(--t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cr-bar{background:#141b22;border-radius:100px;height:4px;overflow:hidden}
-.cr-fill{height:100%;background:var(--g);border-radius:100px;width:0;transition:width 1.5s cubic-bezier(.16,1,.3,1)}
-.cr-count{color:var(--m);text-align:right}
-.pair-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #0d1318;font-size:11px;flex-wrap:wrap}
-.pair-row:last-child{border-bottom:none}
-.ptag{background:#ff6b6b15;border:1px solid #ff6b6b30;color:#ff6b6b;padding:3px 10px;border-radius:4px;white-space:nowrap}
-.parr{color:var(--m)}
-.pcount{color:var(--m);margin-left:auto;white-space:nowrap}
-/* REENTRY */
-.reentry-list{margin-top:20px}
-.re-step{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid #0d1318;align-items:flex-start}
-.re-step:last-child{border-bottom:none}
-.re-num{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--g);min-width:30px;line-height:1;padding-top:2px}
-.re-file{color:#fff;font-size:12px;margin-bottom:2px}
-.re-meta{color:var(--m);font-size:10px}
-/* DNA BARS */
-.dna-row{display:grid;grid-template-columns:90px 1fr 36px;gap:10px;align-items:center;margin-bottom:10px}
-.dna-label{color:var(--m);font-size:11px;text-transform:capitalize}
-.dna-track{background:#141b22;border-radius:100px;height:6px;overflow:hidden}
-.dna-fill{height:100%;border-radius:100px}
-.dna-count{color:var(--t);font-size:11px;text-align:right}
-/* INSTALL */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+.plan{background:var(--s);border:1px solid var(--b);border-radius:14px;padding:28px;position:relative}
+.plan.featured{border-color:var(--g)}
+.plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--g);color:#07090c;font-size:10px;font-weight:700;letter-spacing:.1em;padding:4px 14px;border-radius:100px}
+.plan-name{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#fff}
+.plan-price{margin:16px 0;display:flex;align-items:baseline;gap:4px}
+.plan-amount{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--g);line-height:1}
+.plan-period{font-size:12px;color:var(--m)}
+.plan-desc{font-size:11px;color:var(--m);margin-bottom:20px;line-height:1.8}
+.plan-features{list-style:none;margin-bottom:28px}
+.plan-features li{font-size:11px;color:var(--m);padding:6px 0;border-bottom:1px solid #0d1318;display:flex;gap:8px}
+.plan-features li:last-child{border-bottom:none}
+.plan-features li::before{content:'→';color:var(--g)}
+.plan-btn{display:block;text-align:center;padding:12px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;text-decoration:none;transition:all .2s;cursor:pointer;border:none;width:100%}
+.btn-p{background:var(--g);color:#07090c}.btn-p:hover{background:#00f0c0}
+.btn-s{background:transparent;color:var(--g);border:1px solid #00d4aa33}.btn-s:hover{border-color:var(--g)}
 .install-section{background:linear-gradient(135deg,#0d1e1a,var(--s));border-top:1px solid #00d4aa20;border-bottom:1px solid #00d4aa20;padding:80px 24px;text-align:center}
-.install-wrap{max-width:700px;margin:0 auto}
-.install-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,72px);color:#fff;letter-spacing:.04em;margin-bottom:12px}
+.install-wrap{max-width:600px;margin:0 auto}
+.install-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,72px);color:#fff;margin-bottom:12px}
 .install-sub{color:var(--m);font-size:13px;line-height:1.9;margin-bottom:36px}
 .install-box{background:#0a0e12;border:1px solid var(--b);border-radius:10px;padding:16px 24px;display:inline-flex;align-items:center;gap:14px;margin-bottom:24px;cursor:pointer;transition:border-color .2s}
 .install-box:hover{border-color:var(--g)}
-.ib-prompt{color:var(--g);font-size:14px}
-.ib-cmd{color:#fff;font-size:14px;font-weight:600}
-.ib-copy{color:#1e3a30;font-size:10px}
 .btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .btn{padding:13px 28px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;cursor:pointer;text-decoration:none;transition:all .2s;display:inline-block}
-.btn-p{background:var(--g);color:#07090c;border:1px solid var(--g)}
-.btn-p:hover{background:#00f0c0}
-.btn-s{background:transparent;color:var(--g);border:1px solid #00d4aa33}
-.btn-s:hover{border-color:var(--g);background:#00d4aa10}
-/* FOOTER */
 footer{border-top:1px solid var(--b);padding:32px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--m)}
 footer a{color:var(--m);text-decoration:none}
 footer a:hover{color:var(--g)}
-/* ANIMS */
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:10px;height:10px;border:2px solid #1e3a30;border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
 .reveal.visible{opacity:1;transform:none}
-@media(max-width:700px){.problem-grid,.features-grid,.viz-grid{grid-template-columns:1fr}.hero-title{font-size:72px}}
+@media(max-width:700px){.features-grid,.pricing-grid{grid-template-columns:1fr}.demo-input-row{flex-direction:column}}
 </style>
 </head>
 <body>
-
 <nav>
-  <div class="nav-logo">CC<span>�</span></div>
+  <div class="nav-logo">CONTEXT<span>—</span>COLLAPSE</div>
   <div class="nav-links">
     <a href="#demo">Demo</a>
     <a href="#features">Features</a>
-    <a href="#install">Install</a>
+    <a href="#pricing">Pricing</a>
     <a href="https://github.com/mohamedsaidyekhlef-png/context-collapse" target="_blank">GitHub</a>
-    <a class="nav-btn" href="https://pypi.org/project/context-collapse/" target="_blank">PyPI</a>
+    <a class="nav-btn" href="#demo">Try Free</a>
   </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
+<section class="hero" id="top">
   <div class="grid-bg"></div>
-  <div class="hero-tag">Open Source Developer Tool � v0.1.0</div>
-  <h1 class="hero-title">CONTEXT<span class="acc">�</span><br>COLLAPSE</h1>
-  <p class="hero-desc">Eliminate the <strong>3-day re-entry cost</strong> of returning to any codebase.<br>One command. Any repo. Any language. <strong>Zero dependencies.</strong></p>
-  <div class="hero-install" onclick="navigator.clipboard?.writeText('pip install context-collapse');this.querySelector('.hi-badge').textContent='copied!'">
-    <span class="hi-prompt">$</span>
-    <span class="hi-cmd">pip install context-collapse</span>
-    <span class="hi-badge">click to copy</span>
+  <div class="hero-tag">Open Source · AI-Powered Developer Tool</div>
+  <h1 class="hero-title">CONTEXT<span class="acc">—</span><br>COLLAPSE</h1>
+  <p class="hero-desc">Eliminate the <strong>3-day re-entry cost</strong> of returning to any codebase.<br>Paste a GitHub URL. Get a full analysis in seconds.</p>
+  <div class="demo-box" id="demo">
+    <div class="demo-label">→ Try it live — paste any public GitHub repo</div>
+    <div class="demo-input-row">
+      <span class="demo-prefix">github.com/</span>
+      <input class="demo-input" id="repoInput" type="text" placeholder="pallets/flask" autocomplete="off" spellcheck="false"/>
+      <button class="demo-btn" id="analyzeBtn" onclick="runAnalysis()">ANALYZE →</button>
+    </div>
+    <div class="demo-status status-idle" id="demoStatus">Enter any public GitHub repo above and hit Analyze</div>
+    <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
   </div>
   <div class="hero-badges">
     <span class="badge">Python 3.9+</span>
@@ -161,142 +132,79 @@ footer a:hover{color:var(--g)}
   </div>
 </section>
 
-<!-- PROBLEM -->
-<div class="section reveal" id="problem">
-  <div class="section-tag">The Problem Nobody Named</div>
-  <div class="section-title">The Cold Start<br>Problem</div>
-  <div class="problem-grid">
-    <div class="problem-text">
-      Every developer knows this pain. You open a codebase you haven't touched in 6 months.<br><br>
-      You spend <strong>2-3 days</strong> just re-understanding it before you can write a single line.<br><br>
-      Multiply that by every new hire, every PR review, every open-source contributor.<br><br>
-      This is an <strong>invisible, trillion-dollar productivity drain</strong> � and nobody had a tool for it.<br><br>
-      <strong>context-collapse names it. And eliminates it.</strong>
-    </div>
-    <div class="problem-box">
-      <div class="pb-line"><span class="pb-day">Day 1</span><span class="pb-act">Reading files, trying to understand structure</span></div>
-      <div class="pb-line"><span class="pb-day">Day 2</span><span class="pb-act">Tracing dependencies, hitting dead ends</span></div>
-      <div class="pb-line"><span class="pb-day">Day 3</span><span class="pb-act">Finally have a mental model, start coding</span></div>
-      <hr class="pb-divider">
-      <div class="pb-line"><span class="pb-day">Day 4</span><span class="pb-act" style="color:var(--g)">Make the actual change. Takes 20 minutes.</span></div>
-      <hr class="pb-divider">
-      <div class="pb-total">3 days wasted. Every time. For every developer.</div>
-    </div>
+<div class="report-section" id="reportSection">
+  <div class="report-header">
+    <div><div class="report-title" id="reportTitle">COLD START PACK</div><div class="report-meta" id="reportMeta"></div></div>
+    <div class="report-stats" id="reportStats"></div>
+  </div>
+  <div class="report-frame-wrap"><iframe class="report-frame" id="reportFrame" sandbox="allow-scripts allow-same-origin"></iframe></div>
+  <div class="report-actions">
+    <button class="btn btn-p" onclick="downloadReport()">↓ Download Report</button>
+    <button class="btn btn-s" onclick="resetDemo()">← Analyze Another</button>
   </div>
 </div>
 
-<!-- TERMINAL -->
-<div class="terminal-section reveal" id="demo">
-  <div class="terminal-wrap">
-    <div style="text-align:center;margin-bottom:32px">
-      <div class="section-tag" style="text-align:center">Live Demo</div>
-      <div class="section-title" style="font-size:clamp(32px,4vw,48px)">Real Output on Flask</div>
-    </div>
-    <div class="terminal">
-      <div class="tbar">
-        <div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div>
-        <span class="ttitle">PowerShell � context-collapse � pallets/flask</span>
-      </div>
-      <div class="tbody">
-        <span class="tline on"><span class="tp">PS C:\dev\flask&gt;</span> <span class="tc">context-collapse .</span></span>
-        <span class="tline" id="t1"><span class="ts2">  context-collapse starting...</span></span>
-        <span class="tline" id="t2"><span class="ts2">  Repo: C:\dev\flask</span></span>
-        <span class="tline" id="t3"><span class="tsec">  [1/3]</span> <span class="ts2">Mining git history...</span></span>
-        <span class="tline" id="t4"><span class="ts2">    &rarr; </span><span class="tn">1,247</span><span class="ts2"> commits found</span></span>
-        <span class="tline" id="t5"><span class="ts2">    &rarr; File churn computed (</span><span class="tn">30 files</span><span class="ts2">)</span></span>
-        <span class="tline" id="t6"><span class="ts2">    &rarr; Co-change pairs found: </span><span class="tn">18</span></span>
-        <span class="tline" id="t7"><span class="ts2">    &rarr; </span><span class="tn">200</span><span class="ts2"> commits classified</span></span>
-        <span class="tline" id="t8"><span class="tsec">  [2/3]</span> <span class="ts2">Running AI analysis...</span></span>
-        <span class="tline" id="t9"><span class="ts2">    &rarr; Gemini API key: </span><span class="tn">found &checkmark;</span></span>
-        <span class="tline" id="t10"><span class="ts2">    &rarr; Purpose inference... </span><span class="tn">done</span></span>
-        <span class="tline" id="t11"><span class="ts2">    &rarr; Key decisions extracted... </span><span class="tn">done</span></span>
-        <span class="tline" id="t12"><span class="ts2">    &rarr; Danger zones... </span><span class="tw">3 found &excl;</span></span>
-        <span class="tline" id="t13"><span class="tsec">  [3/3]</span> <span class="ts2">Rendering report...</span></span>
-        <span class="tline" id="t14"><span class="tok">  &checkmark; Done in 1.4s &rarr; cold-start-report.html</span></span>
-        <span class="tline" id="t15"><span class="cursor"></span></span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FEATURES -->
 <div class="section reveal" id="features">
   <div class="section-tag">What You Get</div>
-  <div class="section-title">Inside Every<br>Cold Start Pack</div>
+  <div class="section-title">Inside Every Cold Start Pack</div>
   <div class="features-grid">
-    <div class="feat"><div class="feat-num">01</div><div class="feat-title">Re-Entry Sequence</div><div class="feat-desc">Exactly which files to read first, ranked by importance score. Rebuild 80% of your mental model in 30 minutes.</div></div>
-    <div class="feat"><div class="feat-num">02</div><div class="feat-title">File Churn Heatmap</div><div class="feat-desc">What changes most, visualized. High churn means high importance OR high instability. Know before you touch.</div></div>
-    <div class="feat"><div class="feat-num">03</div><div class="feat-title">Implicit Coupling</div><div class="feat-desc">Files that always change together � the hidden architecture your diagram never shows. The source of 80% of bugs.</div></div>
-    <div class="feat"><div class="feat-num">04</div><div class="feat-title">Danger Zones</div><div class="feat-desc">AI-identified areas where changes cascade silently. Know what to test before you break something in production.</div></div>
-    <div class="feat"><div class="feat-num">05</div><div class="feat-title">Commit DNA</div><div class="feat-desc">Every commit classified by intent: feature, fix, refactor, perf, docs. See the team culture at a glance.</div></div>
-    <div class="feat"><div class="feat-num">06</div><div class="feat-title">Key Decisions</div><div class="feat-desc">AI extracts why the code is shaped the way it is. The architectural choices buried in commit history, surfaced.</div></div>
+    <div class="feat"><div class="feat-num">01</div><div class="feat-title">Re-Entry Sequence</div><div class="feat-desc">Exactly which files to read first, ranked by importance. Rebuild your mental model in 30 minutes.</div></div>
+    <div class="feat"><div class="feat-num">02</div><div class="feat-title">File Churn Heatmap</div><div class="feat-desc">What changes most, visualized. High churn = high importance OR high instability.</div></div>
+    <div class="feat"><div class="feat-num">03</div><div class="feat-title">Implicit Coupling</div><div class="feat-desc">Files that always change together — the hidden architecture your diagram never shows.</div></div>
+    <div class="feat"><div class="feat-num">04</div><div class="feat-title">Danger Zones</div><div class="feat-desc">AI-identified areas where changes cascade silently. Know what to test before you break production.</div></div>
+    <div class="feat"><div class="feat-num">05</div><div class="feat-title">Commit DNA</div><div class="feat-desc">Every commit classified: feature, fix, refactor, perf, docs. See the team culture at a glance.</div></div>
+    <div class="feat"><div class="feat-num">06</div><div class="feat-title">Key Decisions</div><div class="feat-desc">AI extracts why the code is shaped the way it is. Architectural choices surfaced from history.</div></div>
   </div>
 </div>
 
-<!-- VIZ -->
-<div class="viz-section reveal">
-  <div class="section-tag">Real Data � pallets/flask</div>
-  <div class="section-title">What the Report<br>Looks Like</div>
-  <div class="viz-grid">
-    <div class="viz-card">
-      <div class="vc-title">File Churn Heatmap</div>
-      <div class="churn-row"><span class="cr-rank">&#127947;</span><span class="cr-file">src/flask/app.py</span><div class="cr-bar"><div class="cr-fill" data-w="100"></div></div><span class="cr-count">89&times;</span></div>
-      <div class="churn-row"><span class="cr-rank">&#127948;</span><span class="cr-file">CHANGES.rst</span><div class="cr-bar"><div class="cr-fill" data-w="92"></div></div><span class="cr-count">82&times;</span></div>
-      <div class="churn-row"><span class="cr-rank">&#127949;</span><span class="cr-file">src/flask/sansio/app.py</span><div class="cr-bar"><div class="cr-fill" data-w="78"></div></div><span class="cr-count">69&times;</span></div>
-      <div class="churn-row"><span class="cr-rank">4.</span><span class="cr-file">src/flask/ctx.py</span><div class="cr-bar"><div class="cr-fill" data-w="65"></div></div><span class="cr-count">58&times;</span></div>
-      <div class="churn-row"><span class="cr-rank">5.</span><span class="cr-file">src/flask/sessions.py</span><div class="cr-bar"><div class="cr-fill" data-w="54"></div></div><span class="cr-count">48&times;</span></div>
-      <div class="churn-row"><span class="cr-rank">6.</span><span class="cr-file">src/flask/helpers.py</span><div class="cr-bar"><div class="cr-fill" data-w="44"></div></div><span class="cr-count">39&times;</span></div>
+<div class="section reveal" id="pricing">
+  <div class="section-tag">Simple Pricing</div>
+  <div class="section-title">Start Free. Scale When Ready.</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Free</div>
+      <div class="plan-price"><span class="plan-amount">$0</span><span class="plan-period">/forever</span></div>
+      <div class="plan-desc">For developers trying it out.</div>
+      <ul class="plan-features"><li>3 reports total</li><li>Public repos only</li><li>No AI analysis</li><li>Download reports</li></ul>
+      <button class="plan-btn btn-s" onclick="document.getElementById('repoInput').focus();window.scrollTo({top:0,behavior:'smooth'})">Start Free →</button>
     </div>
-    <div class="viz-card">
-      <div class="vc-title">Implicit Coupling Map</div>
-      <div class="pair-row"><span class="ptag">app.py</span><span class="parr">&#10231;</span><span class="ptag">ctx.py</span><span class="pcount">34&times; together</span></div>
-      <div class="pair-row"><span class="ptag">sessions.py</span><span class="parr">&#10231;</span><span class="ptag">app.py</span><span class="pcount">28&times; together</span></div>
-      <div class="pair-row"><span class="ptag">sansio/app</span><span class="parr">&#10231;</span><span class="ptag">helpers.py</span><span class="pcount">21&times; together</span></div>
-      <div class="pair-row"><span class="ptag">cli.py</span><span class="parr">&#10231;</span><span class="ptag">test_cli.py</span><span class="pcount">19&times; together</span></div>
+    <div class="plan featured">
+      <div class="plan-badge">MOST POPULAR</div>
+      <div class="plan-name">Solo</div>
+      <div class="plan-price"><span class="plan-amount">$9</span><span class="plan-period">/month</span></div>
+      <div class="plan-desc">For individual developers.</div>
+      <ul class="plan-features"><li>50 reports / month</li><li>Public + private repos</li><li>AI-powered analysis</li><li>Danger zone detection</li><li>Key decisions extracted</li><li>Download reports</li></ul>
+      <button class="plan-btn btn-p" onclick="alert('Coming soon! Star us on GitHub to get notified.')">Get Solo →</button>
     </div>
-    <div class="viz-card">
-      <div class="vc-title">Re-Entry Reading Sequence</div>
-      <div class="reentry-list">
-        <div class="re-step"><div class="re-num">01</div><div><div class="re-file">src/flask/ctx.py</div><div class="re-meta">58 changes &middot; score 5.8 &middot; read first</div></div></div>
-        <div class="re-step"><div class="re-num">02</div><div><div class="re-file">src/flask/app.py</div><div class="re-meta">89 changes &middot; score 5.0 &middot; core hub</div></div></div>
-        <div class="re-step"><div class="re-num">03</div><div><div class="re-file">src/flask/helpers.py</div><div class="re-meta">39 changes &middot; score 4.9</div></div></div>
-        <div class="re-step"><div class="re-num">04</div><div><div class="re-file">src/flask/sessions.py</div><div class="re-meta">48 changes &middot; score 4.2</div></div></div>
-        <div class="re-step"><div class="re-num">05</div><div><div class="re-file">src/flask/globals.py</div><div class="re-meta">21 changes &middot; score 3.8</div></div></div>
-      </div>
-    </div>
-    <div class="viz-card">
-      <div class="vc-title">Commit DNA</div>
-      <div class="dna-row"><span class="dna-label">feature</span><div class="dna-track"><div class="dna-fill" data-w="42" style="background:#00d4aa"></div></div><span class="dna-count">42%</span></div>
-      <div class="dna-row"><span class="dna-label">fix</span><div class="dna-track"><div class="dna-fill" data-w="31" style="background:#ff6b6b"></div></div><span class="dna-count">31%</span></div>
-      <div class="dna-row"><span class="dna-label">refactor</span><div class="dna-track"><div class="dna-fill" data-w="14" style="background:#a78bfa"></div></div><span class="dna-count">14%</span></div>
-      <div class="dna-row"><span class="dna-label">docs</span><div class="dna-track"><div class="dna-fill" data-w="7" style="background:#94a3b8"></div></div><span class="dna-count">7%</span></div>
-      <div class="dna-row"><span class="dna-label">perf</span><div class="dna-track"><div class="dna-fill" data-w="4" style="background:#fbbf24"></div></div><span class="dna-count">4%</span></div>
-      <div class="dna-row"><span class="dna-label">test</span><div class="dna-track"><div class="dna-fill" data-w="2" style="background:#60a5fa"></div></div><span class="dna-count">2%</span></div>
+    <div class="plan">
+      <div class="plan-name">Team</div>
+      <div class="plan-price"><span class="plan-amount">$29</span><span class="plan-period">/month</span></div>
+      <div class="plan-desc">For teams and organizations.</div>
+      <ul class="plan-features"><li>Unlimited reports</li><li>Public + private repos</li><li>Full AI analysis</li><li>Team dashboard</li><li>Shareable report links</li><li>Priority support</li></ul>
+      <button class="plan-btn btn-s" onclick="alert('Coming soon! Star us on GitHub to get notified.')">Get Team →</button>
     </div>
   </div>
 </div>
 
-<!-- INSTALL -->
-<div class="install-section reveal" id="install">
+<div class="install-section reveal">
   <div class="install-wrap">
-    <div class="section-tag">Get Started</div>
-    <div class="install-title">SHIP FASTER.<br>START NOW.</div>
-    <p class="install-sub">Zero dependencies. Zero config. Pure Python standard library.<br>Works on any OS, any git repo, any language.</p>
-    <div class="install-box" onclick="navigator.clipboard?.writeText('pip install context-collapse');this.querySelector('.ib-copy').textContent='copied!'">
-      <span class="ib-prompt">$</span>
-      <span class="ib-cmd">pip install context-collapse</span>
-      <span class="ib-copy">click to copy</span>
-    </div>
-    <br>
+    <div class="section-tag">Or Run It Locally</div>
+    <div class="install-title">ZERO DEPS. ONE COMMAND.</div>
+    <p class="install-sub">Pure Python stdlib. No config. Works on any OS, any repo, any language.</p>
+    <div class="install-box" onclick="navigator.clipboard?.writeText('pip install context-collapse');this.querySelector('span:last-child').textContent='copied!'">
+      <span style="color:var(--g)">$</span>
+      <span style="color:#fff;font-weight:600">pip install context-collapse</span>
+      <span style="color:#1e3a30;font-size:10px">click to copy</span>
+    </div><br>
     <div class="btn-row">
       <a class="btn btn-p" href="https://pypi.org/project/context-collapse/" target="_blank">View on PyPI</a>
-      <a class="btn btn-s" href="https://github.com/mohamedsaidyekhlef-png/context-collapse" target="_blank">&#9733; Star on GitHub</a>
+      <a class="btn btn-s" href="https://github.com/mohamedsaidyekhlef-png/context-collapse" target="_blank">★ Star on GitHub</a>
     </div>
   </div>
 </div>
 
 <footer>
-  <span>context-collapse &copy; 2026 &middot; MIT License</span>
+  <span>context-collapse © 2026 · MIT License</span>
   <div style="display:flex;gap:20px">
     <a href="https://github.com/mohamedsaidyekhlef-png/context-collapse">GitHub</a>
     <a href="https://pypi.org/project/context-collapse/">PyPI</a>
@@ -305,16 +213,81 @@ footer a:hover{color:var(--g)}
 </footer>
 
 <script>
-const lines=['t1','t2','t3','t4','t5','t6','t7','t8','t9','t10','t11','t12','t13','t14','t15'];
-let i=0;
-function next(){if(i<lines.length){document.getElementById(lines[i])?.classList.add('on');i++;setTimeout(next,i<8?200:140);}}
-setTimeout(next,600);
-const ro=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});},{threshold:0.1});
-document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
-setTimeout(()=>{
-  document.querySelectorAll('.cr-fill').forEach(b=>b.style.width=b.dataset.w+'%');
-  document.querySelectorAll('.dna-fill').forEach(b=>b.style.width=b.dataset.w+'%');
-},1000);
+const API_URL = 'https://context-collapse-api.fly.dev';
+let reportHtml = '';
+
+async function runAnalysis() {
+  const input = document.getElementById('repoInput').value.trim();
+  if (!input) return;
+  const url = input.startsWith('https://github.com/') ? input : 'https://github.com/' + input;
+  setStatus('loading', 'Cloning repository...');
+  setProgress(10);
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('reportSection').classList.remove('visible');
+  try {
+    let p = 10;
+    const ticker = setInterval(() => {
+      p = Math.min(p + Math.random() * 8, 85);
+      setProgress(p);
+      if (p < 30) setStatus('loading', 'Cloning repository...');
+      else if (p < 55) setStatus('loading', 'Mining git history...');
+      else if (p < 75) setStatus('loading', 'Running analysis...');
+      else setStatus('loading', 'Rendering report...');
+    }, 600);
+    const res = await fetch(API_URL + '/analyze', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({repo_url: url})
+    });
+    clearInterval(ticker);
+    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || 'Analysis failed'); }
+    const data = await res.json();
+    setProgress(100);
+    setStatus('ok', '✓ Done — ' + data.stats.commits + ' commits · ' + data.stats.files + ' files · ' + data.stats.pairs + ' coupling pairs');
+    reportHtml = data.report_html;
+    document.getElementById('reportTitle').textContent = url.replace('https://github.com/','').toUpperCase();
+    document.getElementById('reportMeta').textContent = 'Generated ' + new Date().toLocaleString();
+    document.getElementById('reportStats').innerHTML = '<div class="stat"><div class="stat-num">'+data.stats.commits+'</div><div class="stat-label">Commits</div></div><div class="stat"><div class="stat-num">'+data.stats.files+'</div><div class="stat-label">Files</div></div><div class="stat"><div class="stat-num">'+data.stats.pairs+'</div><div class="stat-label">Pairs</div></div>';
+    document.getElementById('reportFrame').srcdoc = data.report_html;
+    document.getElementById('reportSection').classList.add('visible');
+    document.getElementById('reportSection').scrollIntoView({behavior:'smooth',block:'start'});
+  } catch(err) {
+    setProgress(0);
+    setStatus('error', '✗ ' + err.message);
+  }
+  document.getElementById('analyzeBtn').disabled = false;
+}
+
+function downloadReport() {
+  if (!reportHtml) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([reportHtml], {type:'text/html'}));
+  a.download = 'cold-start-report.html';
+  a.click();
+}
+
+function resetDemo() {
+  document.getElementById('reportSection').classList.remove('visible');
+  document.getElementById('repoInput').value = '';
+  setStatus('idle', 'Enter any public GitHub repo above and hit Analyze');
+  setProgress(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function setStatus(type, msg) {
+  const el = document.getElementById('demoStatus');
+  el.className = 'demo-status status-' + type;
+  el.innerHTML = type === 'loading' ? '<span class="spinner"></span>' + msg : msg;
+}
+
+function setProgress(pct) {
+  document.getElementById('progressWrap').classList.toggle('visible', pct > 0 && pct < 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+document.getElementById('repoInput').addEventListener('keydown', e => { if (e.key === 'Enter') runAnalysis(); });
+const ro = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
 </script>
 </body>
 </html>
