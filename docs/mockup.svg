@@ -1,0 +1,186 @@
+<svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" font-family="'IBM Plex Mono', 'Courier New', monospace">
+  <!-- Background -->
+  <rect width="900" height="500" rx="14" fill="#07090c"/>
+  <!-- Subtle grid -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e2a35" stroke-width="0.5"/>
+    </pattern>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4aa;stop-opacity:0.06"/>
+      <stop offset="100%" style="stop-color:#07090c;stop-opacity:0"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="500" rx="14" fill="url(#grid)"/>
+  <rect width="900" height="500" rx="14" fill="url(#glow)"/>
+
+  <!-- Terminal window -->
+  <rect x="24" y="24" width="520" height="210" rx="10" fill="#0e1318" stroke="#1e2a35" stroke-width="1"/>
+  <!-- Title bar -->
+  <rect x="24" y="24" width="520" height="36" rx="10" fill="#131a21"/>
+  <rect x="24" y="46" width="520" height="14" fill="#131a21"/>
+  <circle cx="46" cy="42" r="5" fill="#ff5f57"/>
+  <circle cx="63" cy="42" r="5" fill="#febc2e"/>
+  <circle cx="80" cy="42" r="5" fill="#28c840"/>
+  <text x="200" y="47" font-size="11" fill="#3a5060" letter-spacing="1">context-collapse · pallets/flask</text>
+
+  <!-- Terminal lines -->
+  <text x="40" y="83" font-size="12" fill="#00d4aa">$</text>
+  <text x="52" y="83" font-size="12" fill="#ffffff" font-weight="600">context-collapse .</text>
+  <text x="40" y="103" font-size="11" fill="#fbbf24">  [1/3]</text>
+  <text x="98" y="103" font-size="11" fill="#3a5060"> Mining git history...</text>
+  <text x="40" y="120" font-size="11" fill="#3a5060">    → </text>
+  <text x="68" y="120" font-size="11" fill="#00d4aa">1,247</text>
+  <text x="112" y="120" font-size="11" fill="#3a5060"> commits · </text>
+  <text x="179" y="120" font-size="11" fill="#00d4aa">30</text>
+  <text x="193" y="120" font-size="11" fill="#3a5060"> files · </text>
+  <text x="240" y="120" font-size="11" fill="#00d4aa">18</text>
+  <text x="254" y="120" font-size="11" fill="#3a5060"> pairs</text>
+  <text x="40" y="140" font-size="11" fill="#fbbf24">  [2/3]</text>
+  <text x="98" y="140" font-size="11" fill="#3a5060"> Running AI analysis...</text>
+  <text x="40" y="157" font-size="11" fill="#3a5060">    → danger zones...</text>
+  <text x="186" y="157" font-size="11" fill="#ff6b6b">3 found !</text>
+  <text x="40" y="177" font-size="11" fill="#fbbf24">  [3/3]</text>
+  <text x="98" y="177" font-size="11" fill="#3a5060"> Rendering report...</text>
+  <text x="40" y="200" font-size="12" fill="#00d4aa" font-weight="700">  ✓ Done in 1.4s → cold-start-report.html</text>
+  <!-- cursor -->
+  <rect x="40" y="212" width="7" height="12" fill="#00d4aa" opacity="0.9"/>
+
+  <!-- Churn card -->
+  <rect x="562" y="24" width="314" height="210" rx="10" fill="#0e1318" stroke="#1e2a35" stroke-width="1"/>
+  <rect x="574" y="40" width="3" height="12" rx="2" fill="#00d4aa"/>
+  <text x="583" y="51" font-size="10" fill="#3a5060" letter-spacing="2">FILE CHURN HEATMAP</text>
+
+  <!-- Churn rows -->
+  <!-- row 1 -->
+  <text x="574" y="78" font-size="10" fill="#c8dce8">app.py</text>
+  <rect x="650" y="68" width="190" height="4" rx="2" fill="#141b22"/>
+  <rect x="650" y="68" width="190" height="4" rx="2" fill="#00d4aa"/>
+  <text x="848" y="76" font-size="10" fill="#3a5060" text-anchor="end">89×</text>
+  <!-- row 2 -->
+  <text x="574" y="100" font-size="10" fill="#c8dce8">CHANGES.rst</text>
+  <rect x="650" y="90" width="190" height="4" rx="2" fill="#141b22"/>
+  <rect x="650" y="90" width="175" height="4" rx="2" fill="#00d4aa"/>
+  <text x="848" y="98" font-size="10" fill="#3a5060" text-anchor="end">82×</text>
+  <!-- row 3 -->
+  <text x="574" y="122" font-size="10" fill="#c8dce8">sansio/app.py</text>
+  <rect x="650" y="112" width="190" height="4" rx="2" fill="#141b22"/>
+  <rect x="650" y="112" width="148" height="4" rx="2" fill="#00d4aa"/>
+  <text x="848" y="120" font-size="10" fill="#3a5060" text-anchor="end">69×</text>
+  <!-- row 4 -->
+  <text x="574" y="144" font-size="10" fill="#c8dce8">ctx.py</text>
+  <rect x="650" y="134" width="190" height="4" rx="2" fill="#141b22"/>
+  <rect x="650" y="134" width="124" height="4" rx="2" fill="#00d4aa"/>
+  <text x="848" y="142" font-size="10" fill="#3a5060" text-anchor="end">58×</text>
+  <!-- row 5 -->
+  <text x="574" y="166" font-size="10" fill="#c8dce8">sessions.py</text>
+  <rect x="650" y="156" width="190" height="4" rx="2" fill="#141b22"/>
+  <rect x="650" y="156" width="103" height="4" rx="2" fill="#00d4aa"/>
+  <text x="848" y="164" font-size="10" fill="#3a5060" text-anchor="end">48×</text>
+  <!-- row 6 -->
+  <text x="574" y="188" font-size="10" fill="#c8dce8">helpers.py</text>
+  <rect x="650" y="178" width="190" height="4" rx="2" fill="#141b22"/>
+  <rect x="650" y="178" width="83" height="4" rx="2" fill="#00d4aa"/>
+  <text x="848" y="186" font-size="10" fill="#3a5060" text-anchor="end">39×</text>
+
+  <!-- Coupling card -->
+  <rect x="24" y="250" width="250" height="226" rx="10" fill="#0e1318" stroke="#1e2a35" stroke-width="1"/>
+  <rect x="36" y="266" width="3" height="12" rx="2" fill="#00d4aa"/>
+  <text x="45" y="277" font-size="10" fill="#3a5060" letter-spacing="2">IMPLICIT COUPLING</text>
+  <!-- pairs -->
+  <rect x="36" y="293" width="52" height="18" rx="3" fill="#ff6b6b18" stroke="#ff6b6b30" stroke-width="1"/>
+  <text x="62" y="306" font-size="10" fill="#ff6b6b" text-anchor="middle">app.py</text>
+  <text x="98" y="306" font-size="11" fill="#3a5060">⟷</text>
+  <rect x="112" y="293" width="44" height="18" rx="3" fill="#ff6b6b18" stroke="#ff6b6b30" stroke-width="1"/>
+  <text x="134" y="306" font-size="10" fill="#ff6b6b" text-anchor="middle">ctx.py</text>
+  <text x="162" y="306" font-size="10" fill="#3a5060">34×</text>
+
+  <rect x="36" y="321" width="68" height="18" rx="3" fill="#ff6b6b18" stroke="#ff6b6b30" stroke-width="1"/>
+  <text x="70" y="334" font-size="10" fill="#ff6b6b" text-anchor="middle">sessions.py</text>
+  <text x="114" y="334" font-size="11" fill="#3a5060">⟷</text>
+  <rect x="128" y="321" width="44" height="18" rx="3" fill="#ff6b6b18" stroke="#ff6b6b30" stroke-width="1"/>
+  <text x="150" y="334" font-size="10" fill="#ff6b6b" text-anchor="middle">app.py</text>
+  <text x="178" y="334" font-size="10" fill="#3a5060">28×</text>
+
+  <rect x="36" y="349" width="60" height="18" rx="3" fill="#ff6b6b18" stroke="#ff6b6b30" stroke-width="1"/>
+  <text x="66" y="362" font-size="10" fill="#ff6b6b" text-anchor="middle">sansio/app</text>
+  <text x="106" y="362" font-size="11" fill="#3a5060">⟷</text>
+  <rect x="120" y="349" width="60" height="18" rx="3" fill="#ff6b6b18" stroke="#ff6b6b30" stroke-width="1"/>
+  <text x="150" y="362" font-size="10" fill="#ff6b6b" text-anchor="middle">helpers.py</text>
+  <text x="186" y="362" font-size="10" fill="#3a5060">21×</text>
+
+  <!-- Danger zone alert -->
+  <rect x="36" y="388" width="222" height="72" rx="6" fill="#ff6b6b08" stroke="#ff6b6b25" stroke-width="1"/>
+  <text x="48" y="404" font-size="10" fill="#ff6b6b" font-weight="700">⚠ DANGER ZONE</text>
+  <text x="48" y="420" font-size="10" fill="#3a5060">app.py and ctx.py share</text>
+  <text x="48" y="436" font-size="10" fill="#3a5060">state implicitly. Changing</text>
+  <text x="48" y="452" font-size="10" fill="#3a5060">one without the other = silent fail.</text>
+
+  <!-- DNA card -->
+  <rect x="290" y="250" width="250" height="226" rx="10" fill="#0e1318" stroke="#1e2a35" stroke-width="1"/>
+  <rect x="302" y="266" width="3" height="12" rx="2" fill="#00d4aa"/>
+  <text x="311" y="277" font-size="10" fill="#3a5060" letter-spacing="2">COMMIT DNA</text>
+
+  <!-- DNA bars -->
+  <text x="302" y="304" font-size="10" fill="#3a5060">feature</text>
+  <rect x="366" y="294" width="140" height="6" rx="3" fill="#141b22"/>
+  <rect x="366" y="294" width="59" height="6" rx="3" fill="#00d4aa"/>
+  <text x="512" y="302" font-size="10" fill="#c8dce8" text-anchor="end">42%</text>
+
+  <text x="302" y="326" font-size="10" fill="#3a5060">fix</text>
+  <rect x="366" y="316" width="140" height="6" rx="3" fill="#141b22"/>
+  <rect x="366" y="316" width="43" height="6" rx="3" fill="#ff6b6b"/>
+  <text x="512" y="324" font-size="10" fill="#c8dce8" text-anchor="end">31%</text>
+
+  <text x="302" y="348" font-size="10" fill="#3a5060">refactor</text>
+  <rect x="366" y="338" width="140" height="6" rx="3" fill="#141b22"/>
+  <rect x="366" y="338" width="20" height="6" rx="3" fill="#a78bfa"/>
+  <text x="512" y="346" font-size="10" fill="#c8dce8" text-anchor="end">14%</text>
+
+  <text x="302" y="370" font-size="10" fill="#3a5060">docs</text>
+  <rect x="366" y="360" width="140" height="6" rx="3" fill="#141b22"/>
+  <rect x="366" y="360" width="10" height="6" rx="3" fill="#94a3b8"/>
+  <text x="512" y="368" font-size="10" fill="#c8dce8" text-anchor="end">7%</text>
+
+  <text x="302" y="392" font-size="10" fill="#3a5060">perf</text>
+  <rect x="366" y="382" width="140" height="6" rx="3" fill="#141b22"/>
+  <rect x="366" y="382" width="6" height="6" rx="3" fill="#fbbf24"/>
+  <text x="512" y="390" font-size="10" fill="#c8dce8" text-anchor="end">4%</text>
+
+  <text x="302" y="414" font-size="10" fill="#3a5060">test</text>
+  <rect x="366" y="404" width="140" height="6" rx="3" fill="#141b22"/>
+  <rect x="366" y="404" width="3" height="6" rx="3" fill="#60a5fa"/>
+  <text x="512" y="412" font-size="10" fill="#c8dce8" text-anchor="end">2%</text>
+
+  <!-- Re-entry card -->
+  <rect x="556" y="250" width="320" height="226" rx="10" fill="#0e1318" stroke="#1e2a35" stroke-width="1"/>
+  <rect x="568" y="266" width="3" height="12" rx="2" fill="#00d4aa"/>
+  <text x="577" y="277" font-size="10" fill="#3a5060" letter-spacing="2">RE-ENTRY SEQUENCE</text>
+
+  <text x="568" y="300" font-size="22" fill="#00d4aa20" font-family="'Bebas Neue', sans-serif">01</text>
+  <text x="600" y="296" font-size="11" fill="#ffffff">src/flask/ctx.py</text>
+  <text x="600" y="311" font-size="10" fill="#3a5060">58 changes · score 5.8 · read first</text>
+  <line x1="568" y1="320" x2="860" y2="320" stroke="#1e2a35" stroke-width="1"/>
+
+  <text x="568" y="340" font-size="22" fill="#00d4aa20" font-family="'Bebas Neue', sans-serif">02</text>
+  <text x="600" y="336" font-size="11" fill="#ffffff">src/flask/app.py</text>
+  <text x="600" y="351" font-size="10" fill="#3a5060">89 changes · score 5.0 · core hub</text>
+  <line x1="568" y1="360" x2="860" y2="360" stroke="#1e2a35" stroke-width="1"/>
+
+  <text x="568" y="380" font-size="22" fill="#00d4aa20" font-family="'Bebas Neue', sans-serif">03</text>
+  <text x="600" y="376" font-size="11" fill="#ffffff">src/flask/helpers.py</text>
+  <text x="600" y="391" font-size="10" fill="#3a5060">39 changes · score 4.9</text>
+  <line x1="568" y1="400" x2="860" y2="400" stroke="#1e2a35" stroke-width="1"/>
+
+  <text x="568" y="420" font-size="22" fill="#00d4aa20" font-family="'Bebas Neue', sans-serif">04</text>
+  <text x="600" y="416" font-size="11" fill="#ffffff">src/flask/sessions.py</text>
+  <text x="600" y="431" font-size="10" fill="#3a5060">48 changes · score 4.2</text>
+  <line x1="568" y1="440" x2="860" y2="440" stroke="#1e2a35" stroke-width="1"/>
+
+  <text x="568" y="460" font-size="22" fill="#00d4aa20" font-family="'Bebas Neue', sans-serif">05</text>
+  <text x="600" y="456" font-size="11" fill="#ffffff">src/flask/globals.py</text>
+  <text x="600" y="471" font-size="10" fill="#3a5060">21 changes · score 3.8</text>
+
+  <!-- Bottom branding -->
+  <text x="450" y="491" font-size="10" fill="#1e2a35" text-anchor="middle" letter-spacing="3">CONTEXT-COLLAPSE · context-collapse.ghostskill.com</text>
+</svg>
