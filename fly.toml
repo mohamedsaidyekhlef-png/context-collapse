@@ -2,10 +2,7 @@ app = "context-collapse-api"
 primary_region = "cdg"
 
 [build]
-  builder = "paketobuildpacks/builder:base"
-
-[env]
-  PORT = "8080"
+  dockerfile = "Dockerfile"
 
 [http_service]
   internal_port = 8080
