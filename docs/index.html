@@ -1,1 +1,320 @@
-﻿<!DOCTYPE html><html><head><meta charset="UTF-8"><title>context-collapse</title><meta name="description" content="Eliminate the 3-day re-entry cost of returning to any codebase."><style>body{margin:0;background:#07090c;color:#c8dce8;font-family:monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:40px}.t{font-size:clamp(48px,10vw,96px);font-weight:900;color:#fff;letter-spacing:.04em;line-height:.9}.a{color:#00d4aa}.s{font-size:14px;color:#3a5060;margin-top:20px;line-height:1.8}.s strong{color:#c8dce8}.i{display:inline-block;margin-top:24px;background:#0e1318;border:1px solid #1e2a35;border-radius:8px;padding:12px 24px;font-size:13px;color:#00d4aa}.btn{display:inline-block;margin:8px;padding:12px 24px;border-radius:8px;font-family:monospace;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:.1em}.b1{background:#00d4aa;color:#07090c}.b2{border:1px solid #00d4aa33;color:#00d4aa}</style></head><body><div><div class="t">CONTEXT<span class="a">—</span><br>COLLAPSE</div><div class="s">Eliminate the <strong>3-day re-entry cost</strong> of returning to any codebase.<br>One command. Any repo. Any language. Zero dependencies.</div><div class="i">$ pip install context-collapse</div><br><br><a class="btn b1" href="https://pypi.org/project/context-collapse/">Install from PyPI</a><a class="btn b2" href="https://github.com/mohamedsaidyekhlef-png/context-collapse">Star on GitHub</a></div></body></html>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>context-collapse — Cold Start Pack Generator</title>
+<meta name="description" content="Eliminate the 3-day re-entry cost of returning to any codebase.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Bebas+Neue&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#00d4aa;--bg:#07090c;--s:#0e1318;--b:#1e2a35;--t:#c8dce8;--m:#3a5060}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t);font-family:'IBM Plex Mono',monospace;overflow-x:hidden}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:99;background:#07090ccc;backdrop-filter:blur(12px);border-bottom:1px solid var(--b);padding:0 40px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;letter-spacing:.1em}
+.nav-logo span{color:var(--g)}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{color:var(--m);font-size:11px;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:var(--g)}
+.nav-btn{background:var(--g);color:#07090c;padding:8px 18px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.1em;text-decoration:none;transition:opacity .2s}
+.nav-btn:hover{opacity:.85}
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,#00d4aa08 0%,transparent 70%);pointer-events:none}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--b) 1px,transparent 1px),linear-gradient(90deg,var(--b) 1px,transparent 1px);background-size:48px 48px;opacity:.3;pointer-events:none}
+.hero-tag{font-size:11px;color:var(--g);letter-spacing:.3em;text-transform:uppercase;margin-bottom:24px;animation:fadeUp .6s .1s both}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,15vw,160px);color:#fff;letter-spacing:.04em;line-height:.88;animation:fadeUp .6s .2s both}
+.hero-title .acc{color:var(--g)}
+.hero-desc{font-size:15px;color:var(--m);margin-top:28px;line-height:1.9;max-width:540px;animation:fadeUp .6s .35s both}
+.hero-desc strong{color:var(--t)}
+.hero-install{display:inline-flex;align-items:center;gap:16px;background:var(--s);border:1px solid var(--b);border-radius:10px;padding:14px 24px;margin-top:36px;animation:fadeUp .6s .5s both;cursor:pointer;transition:border-color .2s}
+.hero-install:hover{border-color:var(--g)}
+.hi-prompt{color:var(--g);font-size:14px}
+.hi-cmd{color:#fff;font-size:14px;font-weight:600}
+.hi-badge{background:#00d4aa20;color:var(--g);padding:3px 10px;border-radius:100px;font-size:10px;border:1px solid #00d4aa30}
+.hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;animation:fadeUp .6s .6s both}
+.badge{padding:4px 12px;border-radius:100px;font-size:10px;border:1px solid var(--b);color:var(--m)}
+/* PROBLEM */
+.section{max-width:1100px;margin:0 auto;padding:80px 24px}
+.section-tag{font-size:10px;color:var(--g);letter-spacing:.25em;text-transform:uppercase;margin-bottom:16px}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,60px);color:#fff;letter-spacing:.03em;line-height:1;margin-bottom:20px}
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px;align-items:center}
+.problem-text{color:var(--m);font-size:13px;line-height:2}
+.problem-text strong{color:var(--t)}
+.problem-box{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:28px;font-size:12px;line-height:2.2}
+.pb-line{display:flex;gap:12px;align-items:flex-start}
+.pb-day{color:var(--g);min-width:60px;font-weight:600}
+.pb-act{color:var(--t)}
+.pb-divider{border:none;border-top:1px solid var(--b);margin:12px 0}
+.pb-total{color:#ff6b6b;font-size:11px}
+/* TERMINAL */
+.terminal-section{background:var(--s);border-top:1px solid var(--b);border-bottom:1px solid var(--b);padding:80px 24px}
+.terminal-wrap{max-width:800px;margin:0 auto}
+.terminal{background:#0a0e12;border:1px solid var(--b);border-radius:12px;overflow:hidden;box-shadow:0 40px 80px #000a}
+.tbar{background:var(--s);border-bottom:1px solid var(--b);padding:12px 16px;display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%}
+.dr{background:#ff5f57}.dy{background:#febc2e}.dg{background:#28c840}
+.ttitle{color:var(--m);font-size:11px;margin-left:8px;letter-spacing:.1em}
+.tbody{padding:24px;font-size:12px;line-height:2.2}
+.tp{color:var(--g)}.tc{color:#fff;font-weight:600}.ts2{color:var(--m)}.tsec{color:#fbbf24}.tf{color:#a78bfa}.tn{color:var(--g)}.tw{color:#ff6b6b}.tok{color:var(--g);font-weight:700}
+.tline{display:block;opacity:0}.tline.on{animation:fadeIn .15s forwards}
+.cursor{display:inline-block;width:8px;height:14px;background:var(--g);vertical-align:middle;animation:blink 1s infinite;margin-left:2px}
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+.feat{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:24px;transition:border-color .2s,transform .2s;cursor:default}
+.feat:hover{border-color:#00d4aa40;transform:translateY(-3px)}
+.feat-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:#00d4aa20;line-height:1;margin-bottom:8px}
+.feat-title{font-size:12px;color:#fff;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.feat-desc{font-size:11px;color:var(--m);line-height:1.8}
+/* CHURN VIZ */
+.viz-section{max-width:1100px;margin:0 auto;padding:0 24px 80px}
+.viz-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px}
+.viz-card{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:24px}
+.vc-title{font-size:10px;color:var(--m);letter-spacing:.2em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.vc-title::before{content:'';display:inline-block;width:3px;height:12px;background:var(--g);border-radius:2px}
+.churn-row{display:grid;grid-template-columns:22px 1fr 70px 36px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #0d1318;font-size:11px}
+.churn-row:last-child{border-bottom:none}
+.cr-rank{color:var(--m);font-size:12px}
+.cr-file{color:var(--t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cr-bar{background:#141b22;border-radius:100px;height:4px;overflow:hidden}
+.cr-fill{height:100%;background:var(--g);border-radius:100px;width:0;transition:width 1.5s cubic-bezier(.16,1,.3,1)}
+.cr-count{color:var(--m);text-align:right}
+.pair-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #0d1318;font-size:11px;flex-wrap:wrap}
+.pair-row:last-child{border-bottom:none}
+.ptag{background:#ff6b6b15;border:1px solid #ff6b6b30;color:#ff6b6b;padding:3px 10px;border-radius:4px;white-space:nowrap}
+.parr{color:var(--m)}
+.pcount{color:var(--m);margin-left:auto;white-space:nowrap}
+/* REENTRY */
+.reentry-list{margin-top:20px}
+.re-step{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid #0d1318;align-items:flex-start}
+.re-step:last-child{border-bottom:none}
+.re-num{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--g);min-width:30px;line-height:1;padding-top:2px}
+.re-file{color:#fff;font-size:12px;margin-bottom:2px}
+.re-meta{color:var(--m);font-size:10px}
+/* DNA BARS */
+.dna-row{display:grid;grid-template-columns:90px 1fr 36px;gap:10px;align-items:center;margin-bottom:10px}
+.dna-label{color:var(--m);font-size:11px;text-transform:capitalize}
+.dna-track{background:#141b22;border-radius:100px;height:6px;overflow:hidden}
+.dna-fill{height:100%;border-radius:100px}
+.dna-count{color:var(--t);font-size:11px;text-align:right}
+/* INSTALL */
+.install-section{background:linear-gradient(135deg,#0d1e1a,var(--s));border-top:1px solid #00d4aa20;border-bottom:1px solid #00d4aa20;padding:80px 24px;text-align:center}
+.install-wrap{max-width:700px;margin:0 auto}
+.install-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,72px);color:#fff;letter-spacing:.04em;margin-bottom:12px}
+.install-sub{color:var(--m);font-size:13px;line-height:1.9;margin-bottom:36px}
+.install-box{background:#0a0e12;border:1px solid var(--b);border-radius:10px;padding:16px 24px;display:inline-flex;align-items:center;gap:14px;margin-bottom:24px;cursor:pointer;transition:border-color .2s}
+.install-box:hover{border-color:var(--g)}
+.ib-prompt{color:var(--g);font-size:14px}
+.ib-cmd{color:#fff;font-size:14px;font-weight:600}
+.ib-copy{color:#1e3a30;font-size:10px}
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{padding:13px 28px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;cursor:pointer;text-decoration:none;transition:all .2s;display:inline-block}
+.btn-p{background:var(--g);color:#07090c;border:1px solid var(--g)}
+.btn-p:hover{background:#00f0c0}
+.btn-s{background:transparent;color:var(--g);border:1px solid #00d4aa33}
+.btn-s:hover{border-color:var(--g);background:#00d4aa10}
+/* FOOTER */
+footer{border-top:1px solid var(--b);padding:32px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--m)}
+footer a{color:var(--m);text-decoration:none}
+footer a:hover{color:var(--g)}
+/* ANIMS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
+.reveal.visible{opacity:1;transform:none}
+@media(max-width:700px){.problem-grid,.features-grid,.viz-grid{grid-template-columns:1fr}.hero-title{font-size:72px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">CC<span>—</span></div>
+  <div class="nav-links">
+    <a href="#demo">Demo</a>
+    <a href="#features">Features</a>
+    <a href="#install">Install</a>
+    <a href="https://github.com/mohamedsaidyekhlef-png/context-collapse" target="_blank">GitHub</a>
+    <a class="nav-btn" href="https://pypi.org/project/context-collapse/" target="_blank">PyPI</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="grid-bg"></div>
+  <div class="hero-tag">Open Source Developer Tool · v0.1.0</div>
+  <h1 class="hero-title">CONTEXT<span class="acc">—</span><br>COLLAPSE</h1>
+  <p class="hero-desc">Eliminate the <strong>3-day re-entry cost</strong> of returning to any codebase.<br>One command. Any repo. Any language. <strong>Zero dependencies.</strong></p>
+  <div class="hero-install" onclick="navigator.clipboard?.writeText('pip install context-collapse');this.querySelector('.hi-badge').textContent='copied!'">
+    <span class="hi-prompt">$</span>
+    <span class="hi-cmd">pip install context-collapse</span>
+    <span class="hi-badge">click to copy</span>
+  </div>
+  <div class="hero-badges">
+    <span class="badge">Python 3.9+</span>
+    <span class="badge">Zero Dependencies</span>
+    <span class="badge">Any Language</span>
+    <span class="badge">MIT License</span>
+    <span class="badge">AI-Powered</span>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<div class="section reveal" id="problem">
+  <div class="section-tag">The Problem Nobody Named</div>
+  <div class="section-title">The Cold Start<br>Problem</div>
+  <div class="problem-grid">
+    <div class="problem-text">
+      Every developer knows this pain. You open a codebase you haven't touched in 6 months.<br><br>
+      You spend <strong>2-3 days</strong> just re-understanding it before you can write a single line.<br><br>
+      Multiply that by every new hire, every PR review, every open-source contributor.<br><br>
+      This is an <strong>invisible, trillion-dollar productivity drain</strong> — and nobody had a tool for it.<br><br>
+      <strong>context-collapse names it. And eliminates it.</strong>
+    </div>
+    <div class="problem-box">
+      <div class="pb-line"><span class="pb-day">Day 1</span><span class="pb-act">Reading files, trying to understand structure</span></div>
+      <div class="pb-line"><span class="pb-day">Day 2</span><span class="pb-act">Tracing dependencies, hitting dead ends</span></div>
+      <div class="pb-line"><span class="pb-day">Day 3</span><span class="pb-act">Finally have a mental model, start coding</span></div>
+      <hr class="pb-divider">
+      <div class="pb-line"><span class="pb-day">Day 4</span><span class="pb-act" style="color:var(--g)">Make the actual change. Takes 20 minutes.</span></div>
+      <hr class="pb-divider">
+      <div class="pb-total">3 days wasted. Every time. For every developer.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TERMINAL -->
+<div class="terminal-section reveal" id="demo">
+  <div class="terminal-wrap">
+    <div style="text-align:center;margin-bottom:32px">
+      <div class="section-tag" style="text-align:center">Live Demo</div>
+      <div class="section-title" style="font-size:clamp(32px,4vw,48px)">Real Output on Flask</div>
+    </div>
+    <div class="terminal">
+      <div class="tbar">
+        <div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div>
+        <span class="ttitle">PowerShell — context-collapse · pallets/flask</span>
+      </div>
+      <div class="tbody">
+        <span class="tline on"><span class="tp">PS C:\dev\flask&gt;</span> <span class="tc">context-collapse .</span></span>
+        <span class="tline" id="t1"><span class="ts2">  context-collapse starting...</span></span>
+        <span class="tline" id="t2"><span class="ts2">  Repo: C:\dev\flask</span></span>
+        <span class="tline" id="t3"><span class="tsec">  [1/3]</span> <span class="ts2">Mining git history...</span></span>
+        <span class="tline" id="t4"><span class="ts2">    &rarr; </span><span class="tn">1,247</span><span class="ts2"> commits found</span></span>
+        <span class="tline" id="t5"><span class="ts2">    &rarr; File churn computed (</span><span class="tn">30 files</span><span class="ts2">)</span></span>
+        <span class="tline" id="t6"><span class="ts2">    &rarr; Co-change pairs found: </span><span class="tn">18</span></span>
+        <span class="tline" id="t7"><span class="ts2">    &rarr; </span><span class="tn">200</span><span class="ts2"> commits classified</span></span>
+        <span class="tline" id="t8"><span class="tsec">  [2/3]</span> <span class="ts2">Running AI analysis...</span></span>
+        <span class="tline" id="t9"><span class="ts2">    &rarr; Gemini API key: </span><span class="tn">found &checkmark;</span></span>
+        <span class="tline" id="t10"><span class="ts2">    &rarr; Purpose inference... </span><span class="tn">done</span></span>
+        <span class="tline" id="t11"><span class="ts2">    &rarr; Key decisions extracted... </span><span class="tn">done</span></span>
+        <span class="tline" id="t12"><span class="ts2">    &rarr; Danger zones... </span><span class="tw">3 found &excl;</span></span>
+        <span class="tline" id="t13"><span class="tsec">  [3/3]</span> <span class="ts2">Rendering report...</span></span>
+        <span class="tline" id="t14"><span class="tok">  &checkmark; Done in 1.4s &rarr; cold-start-report.html</span></span>
+        <span class="tline" id="t15"><span class="cursor"></span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section reveal" id="features">
+  <div class="section-tag">What You Get</div>
+  <div class="section-title">Inside Every<br>Cold Start Pack</div>
+  <div class="features-grid">
+    <div class="feat"><div class="feat-num">01</div><div class="feat-title">Re-Entry Sequence</div><div class="feat-desc">Exactly which files to read first, ranked by importance score. Rebuild 80% of your mental model in 30 minutes.</div></div>
+    <div class="feat"><div class="feat-num">02</div><div class="feat-title">File Churn Heatmap</div><div class="feat-desc">What changes most, visualized. High churn means high importance OR high instability. Know before you touch.</div></div>
+    <div class="feat"><div class="feat-num">03</div><div class="feat-title">Implicit Coupling</div><div class="feat-desc">Files that always change together — the hidden architecture your diagram never shows. The source of 80% of bugs.</div></div>
+    <div class="feat"><div class="feat-num">04</div><div class="feat-title">Danger Zones</div><div class="feat-desc">AI-identified areas where changes cascade silently. Know what to test before you break something in production.</div></div>
+    <div class="feat"><div class="feat-num">05</div><div class="feat-title">Commit DNA</div><div class="feat-desc">Every commit classified by intent: feature, fix, refactor, perf, docs. See the team culture at a glance.</div></div>
+    <div class="feat"><div class="feat-num">06</div><div class="feat-title">Key Decisions</div><div class="feat-desc">AI extracts why the code is shaped the way it is. The architectural choices buried in commit history, surfaced.</div></div>
+  </div>
+</div>
+
+<!-- VIZ -->
+<div class="viz-section reveal">
+  <div class="section-tag">Real Data · pallets/flask</div>
+  <div class="section-title">What the Report<br>Looks Like</div>
+  <div class="viz-grid">
+    <div class="viz-card">
+      <div class="vc-title">File Churn Heatmap</div>
+      <div class="churn-row"><span class="cr-rank">&#127947;</span><span class="cr-file">src/flask/app.py</span><div class="cr-bar"><div class="cr-fill" data-w="100"></div></div><span class="cr-count">89&times;</span></div>
+      <div class="churn-row"><span class="cr-rank">&#127948;</span><span class="cr-file">CHANGES.rst</span><div class="cr-bar"><div class="cr-fill" data-w="92"></div></div><span class="cr-count">82&times;</span></div>
+      <div class="churn-row"><span class="cr-rank">&#127949;</span><span class="cr-file">src/flask/sansio/app.py</span><div class="cr-bar"><div class="cr-fill" data-w="78"></div></div><span class="cr-count">69&times;</span></div>
+      <div class="churn-row"><span class="cr-rank">4.</span><span class="cr-file">src/flask/ctx.py</span><div class="cr-bar"><div class="cr-fill" data-w="65"></div></div><span class="cr-count">58&times;</span></div>
+      <div class="churn-row"><span class="cr-rank">5.</span><span class="cr-file">src/flask/sessions.py</span><div class="cr-bar"><div class="cr-fill" data-w="54"></div></div><span class="cr-count">48&times;</span></div>
+      <div class="churn-row"><span class="cr-rank">6.</span><span class="cr-file">src/flask/helpers.py</span><div class="cr-bar"><div class="cr-fill" data-w="44"></div></div><span class="cr-count">39&times;</span></div>
+    </div>
+    <div class="viz-card">
+      <div class="vc-title">Implicit Coupling Map</div>
+      <div class="pair-row"><span class="ptag">app.py</span><span class="parr">&#10231;</span><span class="ptag">ctx.py</span><span class="pcount">34&times; together</span></div>
+      <div class="pair-row"><span class="ptag">sessions.py</span><span class="parr">&#10231;</span><span class="ptag">app.py</span><span class="pcount">28&times; together</span></div>
+      <div class="pair-row"><span class="ptag">sansio/app</span><span class="parr">&#10231;</span><span class="ptag">helpers.py</span><span class="pcount">21&times; together</span></div>
+      <div class="pair-row"><span class="ptag">cli.py</span><span class="parr">&#10231;</span><span class="ptag">test_cli.py</span><span class="pcount">19&times; together</span></div>
+    </div>
+    <div class="viz-card">
+      <div class="vc-title">Re-Entry Reading Sequence</div>
+      <div class="reentry-list">
+        <div class="re-step"><div class="re-num">01</div><div><div class="re-file">src/flask/ctx.py</div><div class="re-meta">58 changes &middot; score 5.8 &middot; read first</div></div></div>
+        <div class="re-step"><div class="re-num">02</div><div><div class="re-file">src/flask/app.py</div><div class="re-meta">89 changes &middot; score 5.0 &middot; core hub</div></div></div>
+        <div class="re-step"><div class="re-num">03</div><div><div class="re-file">src/flask/helpers.py</div><div class="re-meta">39 changes &middot; score 4.9</div></div></div>
+        <div class="re-step"><div class="re-num">04</div><div><div class="re-file">src/flask/sessions.py</div><div class="re-meta">48 changes &middot; score 4.2</div></div></div>
+        <div class="re-step"><div class="re-num">05</div><div><div class="re-file">src/flask/globals.py</div><div class="re-meta">21 changes &middot; score 3.8</div></div></div>
+      </div>
+    </div>
+    <div class="viz-card">
+      <div class="vc-title">Commit DNA</div>
+      <div class="dna-row"><span class="dna-label">feature</span><div class="dna-track"><div class="dna-fill" data-w="42" style="background:#00d4aa"></div></div><span class="dna-count">42%</span></div>
+      <div class="dna-row"><span class="dna-label">fix</span><div class="dna-track"><div class="dna-fill" data-w="31" style="background:#ff6b6b"></div></div><span class="dna-count">31%</span></div>
+      <div class="dna-row"><span class="dna-label">refactor</span><div class="dna-track"><div class="dna-fill" data-w="14" style="background:#a78bfa"></div></div><span class="dna-count">14%</span></div>
+      <div class="dna-row"><span class="dna-label">docs</span><div class="dna-track"><div class="dna-fill" data-w="7" style="background:#94a3b8"></div></div><span class="dna-count">7%</span></div>
+      <div class="dna-row"><span class="dna-label">perf</span><div class="dna-track"><div class="dna-fill" data-w="4" style="background:#fbbf24"></div></div><span class="dna-count">4%</span></div>
+      <div class="dna-row"><span class="dna-label">test</span><div class="dna-track"><div class="dna-fill" data-w="2" style="background:#60a5fa"></div></div><span class="dna-count">2%</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL -->
+<div class="install-section reveal" id="install">
+  <div class="install-wrap">
+    <div class="section-tag">Get Started</div>
+    <div class="install-title">SHIP FASTER.<br>START NOW.</div>
+    <p class="install-sub">Zero dependencies. Zero config. Pure Python standard library.<br>Works on any OS, any git repo, any language.</p>
+    <div class="install-box" onclick="navigator.clipboard?.writeText('pip install context-collapse');this.querySelector('.ib-copy').textContent='copied!'">
+      <span class="ib-prompt">$</span>
+      <span class="ib-cmd">pip install context-collapse</span>
+      <span class="ib-copy">click to copy</span>
+    </div>
+    <br>
+    <div class="btn-row">
+      <a class="btn btn-p" href="https://pypi.org/project/context-collapse/" target="_blank">View on PyPI</a>
+      <a class="btn btn-s" href="https://github.com/mohamedsaidyekhlef-png/context-collapse" target="_blank">&#9733; Star on GitHub</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>context-collapse &copy; 2026 &middot; MIT License</span>
+  <div style="display:flex;gap:20px">
+    <a href="https://github.com/mohamedsaidyekhlef-png/context-collapse">GitHub</a>
+    <a href="https://pypi.org/project/context-collapse/">PyPI</a>
+    <a href="https://github.com/mohamedsaidyekhlef-png/context-collapse/issues">Issues</a>
+  </div>
+</footer>
+
+<script>
+const lines=['t1','t2','t3','t4','t5','t6','t7','t8','t9','t10','t11','t12','t13','t14','t15'];
+let i=0;
+function next(){if(i<lines.length){document.getElementById(lines[i])?.classList.add('on');i++;setTimeout(next,i<8?200:140);}}
+setTimeout(next,600);
+const ro=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+setTimeout(()=>{
+  document.querySelectorAll('.cr-fill').forEach(b=>b.style.width=b.dataset.w+'%');
+  document.querySelectorAll('.dna-fill').forEach(b=>b.style.width=b.dataset.w+'%');
+},1000);
+</script>
+</body>
+</html>
