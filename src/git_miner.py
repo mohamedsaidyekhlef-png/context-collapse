@@ -20,12 +20,26 @@ def get_repo_meta(repo_path):
         parts = line.strip().split("\t", 1)
         if len(parts) == 2:
             contributors.append({"commits": int(parts[0].strip()), "name": parts[1].strip()})
+
+    # Calculate active development span in days
+    active_days = 0
+    if first_commit and last_commit:
+        try:
+            from datetime import datetime
+            fmt = "%Y-%m-%d"
+            d1 = datetime.strptime(first_commit[:10], fmt)
+            d2 = datetime.strptime(last_commit[:10], fmt)
+            active_days = max((d2 - d1).days, 1)
+        except Exception:
+            active_days = 0
+
     return {
         "name": name,
         "total_commits": int(total_commits) if total_commits.isdigit() else 0,
         "first_commit": first_commit[:10] if first_commit else "unknown",
         "last_commit": last_commit[:10] if last_commit else "unknown",
         "contributors": contributors[:10],
+        "active_days": active_days,
     }
 
 
@@ -54,20 +68,39 @@ def get_cochange_pairs(repo_path, top_n=20):
             current.append(line)
     if current:
         commits.append(current)
+
     pair_counts = defaultdict(int)
     for files in commits:
-        files = list(set(files))
-        if len(files) < 2:
+        # Deduplicate and filter out non-code noise
+        files = list(set(f for f in files if not f.endswith((".lock", ".sum", ".mod"))))
+        if len(files) < 2 or len(files) > 20:
+            # Skip single-file commits and giant merge-like commits
             continue
         for i in range(len(files)):
             for j in range(i + 1, len(files)):
                 pair = tuple(sorted([files[i], files[j]]))
                 pair_counts[pair] += 1
+
     sorted_pairs = sorted(pair_counts.items(), key=lambda x: x[1], reverse=True)
-    return [{"file_a": p[0], "file_b": p[1], "co_changes": c} for p, c in sorted_pairs[:top_n] if c >= 2]
+
+    # Adaptive threshold: lower for small repos, higher for large ones
+    total_commits = len(commits)
+    if total_commits < 100:
+        min_cochanges = 1
+    elif total_commits < 500:
+        min_cochanges = 2
+    else:
+        min_cochanges = 3
+
+    return [
+        {"file_a": p[0], "file_b": p[1], "co_changes": c}
+        for p, c in sorted_pairs[:top_n]
+        if c >= min_cochanges
+    ]
 
 
-def get_commit_messages(repo_path, limit=200):
+def get_commit_messages(repo_path, limit=500):
+    """Get up to 500 commits for richer AI analysis."""
     raw = run_git(["log", "--no-merges", f"--max-count={limit}", "--format=%H|||%an|||%ci|||%s"], repo_path)
     commits = []
     for line in raw.splitlines():
@@ -79,39 +112,50 @@ def get_commit_messages(repo_path, limit=200):
 
 def classify_commit(message):
     msg = message.lower()
-    if any(w in msg for w in ["fix", "bug", "patch", "hotfix"]):
+    if any(w in msg for w in ["fix", "bug", "patch", "hotfix", "resolve", "close #", "closes #"]):
         return "fix"
-    if any(w in msg for w in ["feat", "add", "new", "implement"]):
+    if any(w in msg for w in ["feat", "add", "new", "implement", "introduce", "support"]):
         return "feature"
-    if any(w in msg for w in ["refactor", "clean", "restructure"]):
+    if any(w in msg for w in ["refactor", "clean", "restructure", "rename", "move", "extract", "simplify"]):
         return "refactor"
-    if any(w in msg for w in ["test", "spec"]):
+    if any(w in msg for w in ["test", "spec", "coverage", "assert"]):
         return "test"
-    if any(w in msg for w in ["doc", "readme"]):
+    if any(w in msg for w in ["doc", "readme", "changelog", "comment", "typo"]):
         return "docs"
-    if any(w in msg for w in ["perf", "optim", "speed"]):
+    if any(w in msg for w in ["perf", "optim", "speed", "cache", "fast", "lazy"]):
         return "performance"
-    if any(w in msg for w in ["revert", "rollback"]):
+    if any(w in msg for w in ["revert", "rollback", "undo"]):
         return "revert"
+    if any(w in msg for w in ["ci", "deploy", "docker", "github action", "workflow", "pipeline"]):
+        return "devops"
+    if any(w in msg for w in ["security", "vuln", "cve", "auth", "permission", "sanitize"]):
+        return "security"
     return "other"
 
 
 def score_reentry(churn, file_tree):
     import re
-    ENTRY = [r"main\.", r"index\.", r"app\.", r"server\.", r"cli\.", r"__init__", r"core\.", r"config\."]
-    CODE = {".py", ".ts", ".js", ".go", ".rs", ".java", ".rb", ".cs"}
+    ENTRY = [r"main\.", r"index\.", r"app\.", r"server\.", r"cli\.", r"__init__", r"core\.", r"config\.", r"routes?\.", r"api\.", r"handler\."]
+    CODE = {".py", ".ts", ".js", ".jsx", ".tsx", ".go", ".rs", ".java", ".rb", ".cs", ".cpp", ".c", ".swift", ".kt"}
     churn_map = {c["file"]: c["changes"] for c in churn}
     scored = []
     for f in file_tree:
         if Path(f).suffix.lower() not in CODE:
             continue
-        score = min(churn_map.get(f, 0) / 10.0, 3.0)
+        changes = churn_map.get(f, 0)
+        # Higher cap for churn score
+        score = min(changes / 10.0, 5.0)
+        # Bonus for entry-point files
         if any(re.search(p, os.path.basename(f)) for p in ENTRY):
             score += 2.0
+        # Bonus for shallow depth (top-level files matter more)
+        depth = f.count("/")
+        if depth <= 1:
+            score += 0.5
         if score > 0:
-            scored.append({"file": f, "score": round(score, 2), "changes": churn_map.get(f, 0)})
+            scored.append({"file": f, "score": round(score, 2), "changes": changes})
     scored.sort(key=lambda x: x["score"], reverse=True)
-    return scored[:12]
+    return scored[:15]
 
 
 def mine(repo_path):

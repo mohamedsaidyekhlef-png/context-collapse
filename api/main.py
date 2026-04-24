@@ -32,7 +32,7 @@ def analyze(req: AnalyzeRequest):
 
     try:
         r = subprocess.run(
-            ["git", "clone", "--depth=500", url, repo_dir],
+        ["git", "clone", "--depth=1000", url, repo_dir],
             capture_output=True, timeout=120
         )
         if r.returncode != 0:
