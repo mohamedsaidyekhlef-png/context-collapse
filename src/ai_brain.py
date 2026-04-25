@@ -46,7 +46,7 @@ def infer_purpose(meta, commits):
     top = [c["message"] for c in commits[:80]]
     contributors = meta.get("contributors", [])
     top_authors = ", ".join(c["name"] for c in contributors[:3]) if contributors else "unknown"
-    prompt = """You are a senior engineer writing a brutal, honest re-entry briefing for a teammate.
+    prompt = """You are a senior engineer writing a re-entry briefing.
 
 Repository: %s
 Total commits: %d
@@ -56,11 +56,11 @@ Recent commit messages:
 %s
 
 Write exactly 3 sentences:
-1. What this project does and the core problem it solves (be specific, not generic).
+1. What this project does (be specific).
 2. The single most important non-obvious thing to understand before touching the code.
-3. What the team actually spends most effort on, inferred from commit patterns.
+3. What the team spends most effort on based on commit patterns.
 
-Be direct and concrete. No fluff.""" % (
+Be direct. No fluff. No "Alright listen up" opener. Start with the project name.""" % (
         meta["name"], meta["total_commits"], meta["first_commit"], meta["last_commit"],
         top_authors, "\n".join("  - %s" % m for m in top)
     )
@@ -70,21 +70,23 @@ Be direct and concrete. No fluff.""" % (
 def extract_decisions(commits):
     if not GEMINI_API_KEY:
         return ["Set GEMINI_API_KEY to extract key architectural decisions."]
-    messages = [c["message"] for c in commits[:200]]
-    prompt = """From these git commit messages, extract 5 key architectural decisions that shaped this codebase.
+    messages = [c["message"] for c in commits[:120]]
+    prompt = """From these commits, extract 5 short architectural decisions.
 
-Return ONLY a JSON array of 5 strings. No markdown. No code fences. No backticks. No explanation before or after.
-Start your response with [ and end with ].
-Each string should start with an action verb and be one sentence.
+RULES:
+- Return a JSON array of 5 strings
+- Each string MUST be under 20 words
+- Start each with a verb
+- No markdown, no code fences
+- Start response with [ end with ]
 
-Example of the EXACT format I need:
-["Replaced synchronous DB calls with async to handle 10x traffic spike", "Moved auth logic into middleware to decouple from route handlers", "Adopted monorepo structure to share types between frontend and backend", "Switched from REST to GraphQL for mobile client performance", "Pinned all dependencies after a breaking transitive update"]
+Example: ["Added Redis caching for session data", "Split monolith into three microservices", "Switched from REST to GraphQL", "Moved auth to middleware layer", "Adopted trunk-based development"]
 
 Commits:
 %s""" % "\n".join("- %s" % m for m in messages)
-    result = _call_gemini(prompt, max_tokens=800)
+    result = _call_gemini(prompt, max_tokens=500)
     if not result:
-        return ["AI analysis unavailable -- check API key and model access."]
+        return ["AI analysis unavailable -- check API key."]
     try:
         cleaned = result.strip()
         if "`" in cleaned:
@@ -100,17 +102,19 @@ Commits:
         end = cleaned.rfind("]")
         if start != -1 and end != -1:
             cleaned = cleaned[start:end+1]
-        parsed = json.loads(cleaned)
-        if isinstance(parsed, list) and len(parsed) > 0:
-            return [str(d) for d in parsed[:5]]
-        return ["AI returned unexpected format."]
+            parsed = json.loads(cleaned)
+            if isinstance(parsed, list) and len(parsed) > 0:
+                return [str(d)[:120] for d in parsed[:5]]
+        lines = [l.strip().lstrip("0123456789.-) ") for l in result.strip().splitlines() if len(l.strip()) > 10 and not l.strip().startswith("`")]
+        if len(lines) >= 3:
+            return [l[:120] for l in lines[:5]]
+        return ["AI returned incomplete response. Try again."]
     except Exception as e:
         print("  [AI] decision parse error: %s" % e)
-        print("  [AI] raw response: %s" % result[:300])
-        lines = [l.strip().lstrip("0123456789.-) ") for l in result.strip().splitlines() if l.strip() and not l.strip().startswith("`")]
+        lines = [l.strip().lstrip("0123456789.-) ") for l in result.strip().splitlines() if len(l.strip()) > 10 and not l.strip().startswith("`")]
         if len(lines) >= 3:
-            return lines[:5]
-        return ["Could not parse AI decisions -- raw: %s" % result[:150]]
+            return [l[:120] for l in lines[:5]]
+        return ["Could not parse AI decisions."]
 
 
 def generate_shock_insight(meta, churn, cochange, commits):
@@ -127,22 +131,20 @@ def generate_shock_insight(meta, churn, cochange, commits):
     prompt = """You are analyzing git history for %s (%d commits, active %s days).
 
 Most changed files: %s
-Implicit coupling pairs: %s
-Commit breakdown: %s
+Coupling pairs: %s
 Fix rate: %d%% | Feature rate: %d%%
 Contributors: %d
 
-Generate ONE shocking, specific, data-backed insight about this codebase that would make a developer say "oh damn."
-It MUST reference specific filenames or percentages from the data above.
-Return ONLY the insight as a single sentence. No preamble, no quotes.""" % (
+Generate ONE shocking data-backed insight (one sentence, under 30 words).
+Reference specific filenames or percentages.
+No preamble. No quotes. Just the sentence.""" % (
         meta["name"], meta["total_commits"], meta.get("active_days", "?"),
         ", ".join(top_churn),
-        ", ".join(top_pairs) if top_pairs else "none detected",
-        json.dumps(commit_types),
+        ", ".join(top_pairs) if top_pairs else "none",
         fix_pct, feature_pct,
         len(meta.get("contributors", []))
     )
-    return _call_gemini(prompt, max_tokens=250, temperature=0.6)
+    return _call_gemini(prompt, max_tokens=150, temperature=0.6)
 
 
 def identify_dangers(cochange, churn, commits):
@@ -180,7 +182,7 @@ def identify_dangers(cochange, churn, commits):
         dangers.append({
             "zone": "INSTABILITY SIGNAL",
             "severity": "high" if pct > 40 else "medium",
-            "warning": "%d%% of commits are bug fixes -- above the healthy threshold of ~20%%. This codebase may be in chronic firefighting mode." % pct,
+            "warning": "%d%% of commits are bug fixes -- above the healthy threshold of ~20%%." % pct,
             "files": [],
         })
     author_counts = {}
