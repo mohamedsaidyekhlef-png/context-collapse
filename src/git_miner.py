@@ -165,7 +165,7 @@ def mine(repo_path):
     try:
         from ghost_detector import detect_ghosts
         print("  Scanning for ghost contributors...")
-        ghost_zones = detect_ghosts(repo_path, churn)
+        ghost_zones = detect_ghosts(repo_path, churn, meta=meta)
         print("  %d ghost zone(s) found" % len(ghost_zones))
     except Exception as e:
         print("  [Ghost] detection failed: %s" % e)

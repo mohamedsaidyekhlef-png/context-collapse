@@ -1,6 +1,5 @@
 ﻿"""
 Ghost Contributors - detect abandoned ownership of critical files.
-Finds files where the last meaningful author is inactive or gone.
 Zero dependencies, pure stdlib.
 """
 import subprocess
@@ -62,9 +61,23 @@ def get_blame_authors(filepath, repo_path, sample_lines=200):
     return dict(authors), author_times
 
 
-def detect_ghosts(repo_path, churn_files, inactive_days=60):
+def detect_ghosts(repo_path, churn_files, meta=None):
     now = datetime.now()
     ghosts = []
+
+    active_days = 0
+    if meta:
+        active_days = meta.get("active_days", 0)
+
+    if active_days < 30:
+        inactive_days = 7
+    elif active_days < 90:
+        inactive_days = 14
+    elif active_days < 365:
+        inactive_days = 30
+    else:
+        inactive_days = 60
+
     contributors_raw = run_git(
         ["shortlog", "-sn", "--no-merges", "--all"], repo_path
     )
@@ -76,7 +89,9 @@ def detect_ghosts(repo_path, churn_files, inactive_days=60):
             last_date = get_last_active_date(name, repo_path)
             if last_date:
                 all_authors[name] = last_date
+
     files_to_check = [f["file"] for f in churn_files[:10]]
+
     for filepath in files_to_check:
         exists = run_git(["ls-files", "--", filepath], repo_path)
         if not exists:
@@ -101,7 +116,7 @@ def detect_ghosts(repo_path, churn_files, inactive_days=60):
         days_inactive = (now - last_seen).days
         if days_inactive >= inactive_days:
             status = "ghost"
-        elif days_inactive >= inactive_days // 2:
+        elif days_inactive >= max(inactive_days // 2, 3):
             status = "at_risk"
         else:
             status = "active"
