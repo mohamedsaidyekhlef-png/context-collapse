@@ -3,7 +3,7 @@ import json
 import urllib.request
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={key}"
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={key}"
 
 
 def _call_gemini(prompt, max_tokens=1400, temperature=0.35, retries=2):
@@ -13,7 +13,11 @@ def _call_gemini(prompt, max_tokens=1400, temperature=0.35, retries=2):
         try:
             payload = json.dumps({
                 "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"temperature": temperature, "maxOutputTokens": max_tokens},
+                "generationConfig": {
+                    "temperature": temperature,
+                    "maxOutputTokens": max_tokens,
+                    "thinkingConfig": {"thinkingBudget": 0}
+                },
             }).encode()
             req = urllib.request.Request(
                 GEMINI_URL.format(key=GEMINI_API_KEY),
