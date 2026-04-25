@@ -5,7 +5,10 @@ from pathlib import Path
 
 
 def run_git(cmd, cwd):
-    result = subprocess.run(["git"] + cmd, cwd=cwd, capture_output=True, text=True, errors="replace")
+    result = subprocess.run(
+        ["git"] + cmd, cwd=cwd,
+        capture_output=True, text=True, errors="replace"
+    )
     return result.stdout.strip()
 
 
@@ -20,8 +23,6 @@ def get_repo_meta(repo_path):
         parts = line.strip().split("\t", 1)
         if len(parts) == 2:
             contributors.append({"commits": int(parts[0].strip()), "name": parts[1].strip()})
-
-    # Calculate active development span in days
     active_days = 0
     if first_commit and last_commit:
         try:
@@ -32,7 +33,6 @@ def get_repo_meta(repo_path):
             active_days = max((d2 - d1).days, 1)
         except Exception:
             active_days = 0
-
     return {
         "name": name,
         "total_commits": int(total_commits) if total_commits.isdigit() else 0,
@@ -68,22 +68,16 @@ def get_cochange_pairs(repo_path, top_n=20):
             current.append(line)
     if current:
         commits.append(current)
-
     pair_counts = defaultdict(int)
     for files in commits:
-        # Deduplicate and filter out non-code noise
         files = list(set(f for f in files if not f.endswith((".lock", ".sum", ".mod"))))
         if len(files) < 2 or len(files) > 20:
-            # Skip single-file commits and giant merge-like commits
             continue
         for i in range(len(files)):
             for j in range(i + 1, len(files)):
                 pair = tuple(sorted([files[i], files[j]]))
                 pair_counts[pair] += 1
-
     sorted_pairs = sorted(pair_counts.items(), key=lambda x: x[1], reverse=True)
-
-    # Adaptive threshold: lower for small repos, higher for large ones
     total_commits = len(commits)
     if total_commits < 100:
         min_cochanges = 1
@@ -91,7 +85,6 @@ def get_cochange_pairs(repo_path, top_n=20):
         min_cochanges = 2
     else:
         min_cochanges = 3
-
     return [
         {"file_a": p[0], "file_b": p[1], "co_changes": c}
         for p, c in sorted_pairs[:top_n]
@@ -100,8 +93,7 @@ def get_cochange_pairs(repo_path, top_n=20):
 
 
 def get_commit_messages(repo_path, limit=500):
-    """Get up to 500 commits for richer AI analysis."""
-    raw = run_git(["log", "--no-merges", f"--max-count={limit}", "--format=%H|||%an|||%ci|||%s"], repo_path)
+    raw = run_git(["log", "--no-merges", "--max-count=%d" % limit, "--format=%H|||%an|||%ci|||%s"], repo_path)
     commits = []
     for line in raw.splitlines():
         parts = line.split("|||", 3)
@@ -143,12 +135,9 @@ def score_reentry(churn, file_tree):
         if Path(f).suffix.lower() not in CODE:
             continue
         changes = churn_map.get(f, 0)
-        # Higher cap for churn score
         score = min(changes / 10.0, 5.0)
-        # Bonus for entry-point files
         if any(re.search(p, os.path.basename(f)) for p in ENTRY):
             score += 2.0
-        # Bonus for shallow depth (top-level files matter more)
         depth = f.count("/")
         if depth <= 1:
             score += 0.5
@@ -159,9 +148,9 @@ def score_reentry(churn, file_tree):
 
 
 def mine(repo_path):
-    print(f"  Repo: {os.path.abspath(repo_path)}")
+    print("  Repo: %s" % os.path.abspath(repo_path))
     meta = get_repo_meta(repo_path)
-    print(f"  {meta['total_commits']} commits found")
+    print("  %d commits found" % meta["total_commits"])
     churn = get_file_churn(repo_path)
     cochange = get_cochange_pairs(repo_path)
     commits = get_commit_messages(repo_path)
@@ -172,6 +161,14 @@ def mine(repo_path):
     type_counts = defaultdict(int)
     for c in commits:
         type_counts[c["type"]] += 1
+    ghost_zones = []
+    try:
+        from ghost_detector import detect_ghosts
+        print("  Scanning for ghost contributors...")
+        ghost_zones = detect_ghosts(repo_path, churn)
+        print("  %d ghost zone(s) found" % len(ghost_zones))
+    except Exception as e:
+        print("  [Ghost] detection failed: %s" % e)
     return {
         "meta": meta,
         "churn": churn,
@@ -179,4 +176,5 @@ def mine(repo_path):
         "commits": commits,
         "commit_types": dict(type_counts),
         "reentry_sequence": reentry,
+        "ghost_zones": ghost_zones,
     }
