@@ -143,7 +143,7 @@ footer a:hover{color:var(--g)}
 .spinner{display:inline-block;width:10px;height:10px;border:2px solid #1e3a30;border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
 .reveal.visible{opacity:1;transform:none}
-@media(max-width:700px){.problem-grid,.features-grid,.pricing-grid{grid-template-columns:1fr}.demo-input-row{flex-direction:column;border-radius:10px}.demo-btn{padding:14px;border-radius:0 0 9px 9px}.nav-links a:not(.nav-btn){display:none}}
+@media(max-width:700px){.problem-grid,.features-grid,.pricing-grid{grid-template-columns:1fr}.demo-input-row{flex-direction:column;border-radius:10px}.demo-btn{padding:14px;border-radius:0 0 9px 9px}}
 </style>
 </head>
 <body>
@@ -164,14 +164,14 @@ footer a:hover{color:var(--g)}
   <div class="grid-bg"></div>
   <div class="hero-tag">Open Source · AI-Powered Developer Tool</div>
   <h1 class="hero-title">CONTEXT<span class="acc">—</span><br>COLLAPSE</h1>
-  <p class="hero-desc">Understand any codebase in <strong>30 minutes — not 3 days.</strong><br>Paste a GitHub URL. Get a full AI-powered analysis in seconds.</p>
+  <p class="hero-desc">Eliminate the <strong>3-day re-entry cost</strong> of returning to any codebase.<br>Paste a GitHub URL. Get a full analysis in seconds.</p>
 
   <!-- LIVE DEMO INPUT -->
   <div class="demo-box" id="demo">
     <div class="demo-label">→ Try it live — paste any public GitHub repo</div>
     <div class="demo-input-row">
       <span class="demo-prefix">github.com/</span>
-      <input class="demo-input" id="repoInput" type="text" placeholder="pallets/flask" autocomplete="off" spellcheck="false"/>
+      <input class="demo-input" id="repoInput" type="text" placeholder="torvalds/linux" autocomplete="off" spellcheck="false"/>
       <button class="demo-btn" id="analyzeBtn" onclick="runAnalysis()">ANALYZE →</button>
     </div>
     <div class="demo-status status-idle" id="demoStatus">Enter any public GitHub repo above and hit Analyze</div>
@@ -324,7 +324,8 @@ footer a:hover{color:var(--g)}
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────
-const API_URL = 'https://context-collapse-api.fly.dev';
+// Replace this with your Railway API URL after deploying
+const API_URL = 'https://your-api.railway.app';
 
 let reportHtml = '';
 
@@ -342,15 +343,15 @@ async function runAnalysis() {
   document.getElementById('analyzeBtn').disabled = true;
   document.getElementById('reportSection').classList.remove('visible');
 
-  let ticker;
   try {
+    // Simulate progress while waiting
     let p = 10;
-    ticker = setInterval(() => {
+    const ticker = setInterval(() => {
       p = Math.min(p + Math.random() * 8, 85);
       setProgress(p);
       if (p < 30) setStatus('loading', '⟳ Cloning repository...');
       else if (p < 55) setStatus('loading', '⟳ Mining git history...');
-      else if (p < 75) setStatus('loading', '⟳ Running AI analysis...');
+      else if (p < 75) setStatus('loading', '⟳ Running analysis...');
       else setStatus('loading', '⟳ Rendering report...');
     }, 600);
 
@@ -363,7 +364,7 @@ async function runAnalysis() {
     clearInterval(ticker);
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: `Server error ${res.status}` }));
+      const err = await res.json();
       throw new Error(err.detail || 'Analysis failed');
     }
 
@@ -375,12 +376,8 @@ async function runAnalysis() {
     showReport(url, data);
 
   } catch (err) {
-    if (ticker) clearInterval(ticker);
     setProgress(0);
-    const msg = err.message === 'Failed to fetch'
-      ? 'Could not reach the server. It may be starting up — try again in 30 seconds.'
-      : err.message;
-    setStatus('error', `✗ ${msg}`);
+    setStatus('error', `✗ ${err.message}`);
     document.getElementById('analyzeBtn').disabled = false;
   }
 }
@@ -432,10 +429,12 @@ function setProgress(pct) {
   bar.style.width = pct + '%';
 }
 
+// Enter key on input
 document.getElementById('repoInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') runAnalysis();
 });
 
+// Scroll reveal
 const ro = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.1 });
