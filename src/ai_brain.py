@@ -3,7 +3,7 @@ import json
 import urllib.request
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={key}"
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={key}"
 
 
 def _call_gemini(prompt, max_tokens=1400, temperature=0.35, retries=2):
@@ -25,11 +25,11 @@ def _call_gemini(prompt, max_tokens=1400, temperature=0.35, retries=2):
                 data = json.loads(resp.read())
                 candidates = data.get("candidates", [])
                 if not candidates:
-                    print("  [AI] no candidates in response (attempt %d)" % (attempt+1))
+                    print("  [AI] no candidates (attempt %d)" % (attempt+1))
                     continue
                 parts = candidates[0].get("content", {}).get("parts", [])
                 if not parts:
-                    print("  [AI] no parts in response (attempt %d)" % (attempt+1))
+                    print("  [AI] no parts (attempt %d)" % (attempt+1))
                     continue
                 return parts[0].get("text", "").strip()
         except Exception as e:
@@ -39,112 +39,89 @@ def _call_gemini(prompt, max_tokens=1400, temperature=0.35, retries=2):
 
 def infer_purpose(meta, commits):
     if not GEMINI_API_KEY:
-        return (
-            "%s has %d commits from %s to %s. "
-            "Set GEMINI_API_KEY for AI insights."
-        ) % (meta["name"], meta["total_commits"], meta["first_commit"], meta["last_commit"])
-    top = [c["message"] for c in commits[:80]]
-    contributors = meta.get("contributors", [])
-    top_authors = ", ".join(c["name"] for c in contributors[:3]) if contributors else "unknown"
-    prompt = """You are a senior engineer writing a re-entry briefing.
+        return "%s has %d commits. Set GEMINI_API_KEY for AI insights." % (meta["name"], meta["total_commits"])
+    top = [c["message"] for c in commits[:60]]
+    prompt = """Repository: %s (%d commits, %s to %s)
 
-Repository: %s
-Total commits: %d
-Active period: %s to %s
-Top contributors: %s
-Recent commit messages:
+Commits:
 %s
 
-Write exactly 3 sentences:
-1. What this project does (be specific).
-2. The single most important non-obvious thing to understand before touching the code.
-3. What the team spends most effort on based on commit patterns.
+Write 3 sentences about this project:
+1. What it does specifically.
+2. One non-obvious thing to know before editing the code.
+3. What the team spends most effort on based on commits.
 
-Be direct. No fluff. No "Alright listen up" opener. Start with the project name.""" % (
+Start with the project name. No filler words.""" % (
         meta["name"], meta["total_commits"], meta["first_commit"], meta["last_commit"],
-        top_authors, "\n".join("  - %s" % m for m in top)
+        "\n".join("- %s" % m for m in top)
     )
-    return _call_gemini(prompt) or ("%s -- AI analysis unavailable." % meta["name"])
+    return _call_gemini(prompt, max_tokens=400) or ("%s -- AI unavailable." % meta["name"])
 
 
 def extract_decisions(commits):
     if not GEMINI_API_KEY:
-        return ["Set GEMINI_API_KEY to extract key architectural decisions."]
-    messages = [c["message"] for c in commits[:120]]
-    prompt = """From these commits, extract 5 short architectural decisions.
+        return ["Set GEMINI_API_KEY to extract decisions."]
+    messages = [c["message"] for c in commits[:100]]
+    prompt = """From these git commits, list 5 key architectural decisions.
 
-RULES:
-- Return a JSON array of 5 strings
-- Each string MUST be under 20 words
-- Start each with a verb
-- No markdown, no code fences
-- Start response with [ end with ]
+Format: one decision per line, numbered 1 to 5.
+Each under 15 words. Start each with a verb.
+No JSON. No bullets. No explanation. Just 5 numbered lines.
 
-Example: ["Added Redis caching for session data", "Split monolith into three microservices", "Switched from REST to GraphQL", "Moved auth to middleware layer", "Adopted trunk-based development"]
+Example:
+1. Switched from REST to GraphQL for mobile performance
+2. Added Redis caching layer for session persistence
+3. Split auth into dedicated middleware service
+4. Migrated database from MongoDB to PostgreSQL
+5. Adopted monorepo to share types across packages
 
 Commits:
 %s""" % "\n".join("- %s" % m for m in messages)
-    result = _call_gemini(prompt, max_tokens=500)
+    result = _call_gemini(prompt, max_tokens=300)
     if not result:
-        return ["AI analysis unavailable -- check API key."]
+        return ["AI unavailable."]
+    lines = []
+    for line in result.strip().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        cleaned = line.lstrip("0123456789.-:) ").strip()
+        if len(cleaned) > 8:
+            lines.append(cleaned[:120])
+    if len(lines) >= 3:
+        return lines[:5]
     try:
-        cleaned = result.strip()
-        if "`" in cleaned:
-            parts = cleaned.split("`")
-            for part in parts:
-                part = part.strip()
-                if part.startswith("json"):
-                    part = part[4:].strip()
-                if part.startswith("["):
-                    cleaned = part
-                    break
-        start = cleaned.find("[")
-        end = cleaned.rfind("]")
+        start = result.find("[")
+        end = result.rfind("]")
         if start != -1 and end != -1:
-            cleaned = cleaned[start:end+1]
-            parsed = json.loads(cleaned)
-            if isinstance(parsed, list) and len(parsed) > 0:
+            parsed = json.loads(result[start:end+1])
+            if isinstance(parsed, list):
                 return [str(d)[:120] for d in parsed[:5]]
-        lines = [l.strip().lstrip("0123456789.-) ") for l in result.strip().splitlines() if len(l.strip()) > 10 and not l.strip().startswith("`")]
-        if len(lines) >= 3:
-            return [l[:120] for l in lines[:5]]
-        return ["AI returned incomplete response. Try again."]
-    except Exception as e:
-        print("  [AI] decision parse error: %s" % e)
-        lines = [l.strip().lstrip("0123456789.-) ") for l in result.strip().splitlines() if len(l.strip()) > 10 and not l.strip().startswith("`")]
-        if len(lines) >= 3:
-            return [l[:120] for l in lines[:5]]
-        return ["Could not parse AI decisions."]
+    except Exception:
+        pass
+    return lines[:5] if lines else ["Could not extract decisions from this repo."]
 
 
 def generate_shock_insight(meta, churn, cochange, commits):
     if not GEMINI_API_KEY:
         return None
-    top_churn = ["%s (%dx)" % (c["file"], c["changes"]) for c in churn[:8]]
-    top_pairs = ["%s <-> %s (%dx)" % (p["file_a"], p["file_b"], p["co_changes"]) for p in cochange[:5]]
+    top_churn = ["%s (%dx)" % (c["file"], c["changes"]) for c in churn[:6]]
     commit_types = {}
     for c in commits:
         t = c.get("type", "other")
         commit_types[t] = commit_types.get(t, 0) + 1
     fix_pct = round(commit_types.get("fix", 0) / max(len(commits), 1) * 100)
     feature_pct = round(commit_types.get("feature", 0) / max(len(commits), 1) * 100)
-    prompt = """You are analyzing git history for %s (%d commits, active %s days).
+    prompt = """Repo: %s, %d commits, %d contributors.
+Hottest files: %s
+Fix rate: %d%%, Feature rate: %d%%
 
-Most changed files: %s
-Coupling pairs: %s
-Fix rate: %d%% | Feature rate: %d%%
-Contributors: %d
-
-Generate ONE shocking data-backed insight (one sentence, under 30 words).
-Reference specific filenames or percentages.
-No preamble. No quotes. Just the sentence.""" % (
-        meta["name"], meta["total_commits"], meta.get("active_days", "?"),
-        ", ".join(top_churn),
-        ", ".join(top_pairs) if top_pairs else "none",
-        fix_pct, feature_pct,
-        len(meta.get("contributors", []))
+One shocking sentence about this codebase (under 25 words).
+Must mention a specific filename or percentage. No quotes. Just the sentence.""" % (
+        meta["name"], meta["total_commits"], len(meta.get("contributors", [])),
+        ", ".join(top_churn), fix_pct, feature_pct
     )
-    return _call_gemini(prompt, max_tokens=150, temperature=0.6)
+    return _call_gemini(prompt, max_tokens=100, temperature=0.6)
 
 
 def identify_dangers(cochange, churn, commits):
@@ -156,23 +133,15 @@ def identify_dangers(cochange, churn, commits):
         dangers.append({
             "zone": "IMPLICIT COUPLING",
             "severity": "high" if pct > 15 else "medium",
-            "warning": "%s and %s change together %dx (%d%% of all commits). They are architecturally entangled." % (top["file_a"], top["file_b"], top["co_changes"], pct),
+            "warning": "%s and %s change together %dx (%d%% of commits)." % (top["file_a"], top["file_b"], top["co_changes"], pct),
             "files": [top["file_a"], top["file_b"]],
         })
-        if len(cochange) > 1:
-            second = cochange[1]
-            dangers.append({
-                "zone": "CO-CHANGE CLUSTER",
-                "severity": "medium",
-                "warning": "%s and %s are a secondary coupling risk (%dx together)." % (second["file_a"], second["file_b"], second["co_changes"]),
-                "files": [second["file_a"], second["file_b"]],
-            })
     if churn:
         top = churn[0]
         dangers.append({
             "zone": "CHURN HOTSPOT",
             "severity": "high" if top["changes"] > 40 else "medium",
-            "warning": "%s has been modified %d times -- the single most volatile file in this repo. Every PR that touches it carries elevated regression risk." % (top["file"], top["changes"]),
+            "warning": "%s has been modified %d times -- the most volatile file. Every PR touching it carries regression risk." % (top["file"], top["changes"]),
             "files": [top["file"]],
         })
     fix_count = sum(1 for c in commits if c.get("type") == "fix")
@@ -182,7 +151,7 @@ def identify_dangers(cochange, churn, commits):
         dangers.append({
             "zone": "INSTABILITY SIGNAL",
             "severity": "high" if pct > 40 else "medium",
-            "warning": "%d%% of commits are bug fixes -- above the healthy threshold of ~20%%." % pct,
+            "warning": "%d%% of commits are bug fixes -- above the ~20%% healthy threshold." % pct,
             "files": [],
         })
     author_counts = {}
@@ -196,7 +165,7 @@ def identify_dangers(cochange, churn, commits):
             dangers.append({
                 "zone": "BUS FACTOR RISK",
                 "severity": "high",
-                "warning": "%s authored %d%% of all commits. If this person leaves, institutional knowledge walks out the door." % (top_author, top_pct),
+                "warning": "%s authored %d%% of all commits. If they leave, institutional knowledge walks out." % (top_author, top_pct),
                 "files": [],
             })
     test_count = sum(1 for c in commits if c.get("type") == "test")
@@ -204,7 +173,7 @@ def identify_dangers(cochange, churn, commits):
         dangers.append({
             "zone": "TEST DESERT",
             "severity": "medium",
-            "warning": "Only %d of %d commits mention tests (%s%%). This codebase likely has minimal automated test coverage." % (test_count, total, round(test_count/max(total,1)*100, 1)),
+            "warning": "Only %d of %d commits mention tests (%s%%). Minimal test coverage likely." % (test_count, total, round(test_count/max(total,1)*100, 1)),
             "files": [],
         })
     return dangers
