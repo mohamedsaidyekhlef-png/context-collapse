@@ -2,48 +2,87 @@
 import json
 import urllib.request
 
+# ── Provider Config ──
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={key}"
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 
-def _call_gemini(prompt, max_tokens=1400, temperature=0.35, retries=2):
+def _call_groq(prompt, max_tokens=800, temperature=0.3):
+    if not GROQ_API_KEY:
+        return ""
+    try:
+        payload = json.dumps({
+            "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }).encode()
+        req = urllib.request.Request(
+            GROQ_URL,
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer %s" % GROQ_API_KEY,
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read())
+            return data["choices"][0]["message"]["content"].strip()
+    except Exception as e:
+        print("  [Groq] failed: %s" % e)
+        return ""
+
+
+def _call_gemini(prompt, max_tokens=800, temperature=0.35):
     if not GEMINI_API_KEY:
         return ""
-    for attempt in range(retries):
-        try:
-            payload = json.dumps({
-                "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {
-                    "temperature": temperature,
-                    "maxOutputTokens": max_tokens,
-                    "thinkingConfig": {"thinkingBudget": 0}
-                },
-            }).encode()
-            req = urllib.request.Request(
-                GEMINI_URL.format(key=GEMINI_API_KEY),
-                data=payload,
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                data = json.loads(resp.read())
-                candidates = data.get("candidates", [])
-                if not candidates:
-                    print("  [AI] no candidates (attempt %d)" % (attempt+1))
-                    continue
-                parts = candidates[0].get("content", {}).get("parts", [])
-                if not parts:
-                    print("  [AI] no parts (attempt %d)" % (attempt+1))
-                    continue
-                return parts[0].get("text", "").strip()
-        except Exception as e:
-            print("  [AI] attempt %d failed: %s" % (attempt+1, e))
+    try:
+        payload = json.dumps({
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": temperature,
+                "maxOutputTokens": max_tokens,
+                "thinkingConfig": {"thinkingBudget": 0}
+            },
+        }).encode()
+        req = urllib.request.Request(
+            GEMINI_URL.format(key=GEMINI_API_KEY),
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read())
+            candidates = data.get("candidates", [])
+            if not candidates:
+                return ""
+            parts = candidates[0].get("content", {}).get("parts", [])
+            if not parts:
+                return ""
+            return parts[0].get("text", "").strip()
+    except Exception as e:
+        print("  [Gemini] failed: %s" % e)
+        return ""
+
+
+def _call_llm(prompt, max_tokens=800, temperature=0.35):
+    """Try Groq first (faster, more reliable), fall back to Gemini."""
+    result = _call_groq(prompt, max_tokens, temperature)
+    if result:
+        return result
+    result = _call_gemini(prompt, max_tokens, temperature)
+    if result:
+        return result
     return ""
 
 
 def infer_purpose(meta, commits):
-    if not GEMINI_API_KEY:
-        return "%s has %d commits. Set GEMINI_API_KEY for AI insights." % (meta["name"], meta["total_commits"])
+    if not GROQ_API_KEY and not GEMINI_API_KEY:
+        return "%s has %d commits. Set GROQ_API_KEY or GEMINI_API_KEY for AI insights." % (meta["name"], meta["total_commits"])
     top = [c["message"] for c in commits[:60]]
     prompt = """Repository: %s (%d commits, %s to %s)
 
@@ -59,12 +98,12 @@ Start with the project name. No filler words.""" % (
         meta["name"], meta["total_commits"], meta["first_commit"], meta["last_commit"],
         "\n".join("- %s" % m for m in top)
     )
-    return _call_gemini(prompt, max_tokens=400) or ("%s -- AI unavailable." % meta["name"])
+    return _call_llm(prompt, max_tokens=400) or ("%s -- AI unavailable." % meta["name"])
 
 
 def extract_decisions(commits):
-    if not GEMINI_API_KEY:
-        return ["Set GEMINI_API_KEY to extract decisions."]
+    if not GROQ_API_KEY and not GEMINI_API_KEY:
+        return ["Set GROQ_API_KEY or GEMINI_API_KEY to extract decisions."]
     messages = [c["message"] for c in commits[:100]]
     prompt = """From these git commits, list 5 key architectural decisions.
 
@@ -81,7 +120,7 @@ Example:
 
 Commits:
 %s""" % "\n".join("- %s" % m for m in messages)
-    result = _call_gemini(prompt, max_tokens=300)
+    result = _call_llm(prompt, max_tokens=300)
     if not result:
         return ["AI unavailable."]
     lines = []
@@ -107,7 +146,7 @@ Commits:
 
 
 def generate_shock_insight(meta, churn, cochange, commits):
-    if not GEMINI_API_KEY:
+    if not GROQ_API_KEY and not GEMINI_API_KEY:
         return None
     top_churn = ["%s (%dx)" % (c["file"], c["changes"]) for c in churn[:6]]
     commit_types = {}
@@ -125,7 +164,7 @@ Must mention a specific filename or percentage. No quotes. Just the sentence."""
         meta["name"], meta["total_commits"], len(meta.get("contributors", [])),
         ", ".join(top_churn), fix_pct, feature_pct
     )
-    return _call_gemini(prompt, max_tokens=100, temperature=0.6)
+    return _call_llm(prompt, max_tokens=100, temperature=0.6)
 
 
 def identify_dangers(cochange, churn, commits):
@@ -185,6 +224,12 @@ def identify_dangers(cochange, churn, commits):
 
 def enrich(data):
     print("  Running AI layer...")
+    if GROQ_API_KEY:
+        print("  Using Groq (Llama 4 Scout)")
+    elif GEMINI_API_KEY:
+        print("  Using Gemini 2.5 Flash")
+    else:
+        print("  No AI key set -- skipping AI")
     shock = generate_shock_insight(
         data["meta"], data["churn"], data["cochange"], data["commits"]
     )
@@ -193,6 +238,6 @@ def enrich(data):
         "key_decisions": extract_decisions(data["commits"]),
         "danger_zones": identify_dangers(data["cochange"], data["churn"], data["commits"]),
         "shock_insight": shock,
-        "ai_powered": bool(GEMINI_API_KEY),
+        "ai_powered": bool(GROQ_API_KEY or GEMINI_API_KEY),
     }
     return data
